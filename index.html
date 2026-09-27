@@ -168,9 +168,9 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
             </div>
             <div class="field"><label><span id="lblReason">Reason for call</span> <span class="req">*</span></label><select id="fCat"></select></div>
             <div class="row hidden" id="refWrap">
-              <div class="field"><label>MoMo / transaction / ticket ref <span class="req">*</span></label><input id="fRef" maxlength="80"></div>
+              <div class="field"><label>Mobile Money # / Transaction ID <span class="req">*</span></label><input id="fRef" maxlength="80" placeholder="e.g. 0977123456 or MP260923.1811.C44"></div>
               <div class="field"><label>Amount (K)</label><input id="fAmt" type="number" min="0" step="0.01"></div>
-              <div class="hint" style="flex-basis:100%;margin-top:-8px"><span>Give the reference or the amount involved — finance cannot trace money without it.</span></div>
+              <div class="hint" style="flex-basis:100%;margin-top:-8px"><span>The Mobile Money number they played with, or the Transaction ID from their SMS — finance cannot trace money without it.</span></div>
             </div>
             <div id="notesBlock">
             <div class="field"><label id="lblIssue">What did the caller ask or report? <span class="req">*</span></label>
@@ -611,7 +611,7 @@ async function loadHistory(ph){
       <div class="small muted">${fmtDT(c.created_at)} · ${esc(c.agent)} · ${c.direction==='IN'?'⬇ in':'⬆ out'} ${c.station?'· '+esc(c.station):''}</div>
       <div><b>${esc(c.category || '—')}</b> ${outBadge(c.outcome)} ${c.source==='IMPORT'?'<span class="badge blue">Google Forms</span>':''} ${c.escalation_id?'#'+c.escalation_id+' '+escBadge(c.escalation_status):''}</div>
       ${c.issue_note?`<div class="small">${esc(c.issue_note)}</div>`:''}${c.action_note?`<div class="small muted">→ ${esc(c.action_note)}</div>`:''}
-      ${c.ref_no?`<div class="small">Ref: ${esc(c.ref_no)}</div>`:''}</div>`).join('');
+      ${c.ref_no?`<div class="small">MoMo # / Txn ID: ${esc(c.ref_no)}</div>`:''}</div>`).join('');
     $('histBox').innerHTML = html;
   } catch(e) { $('histBox').textContent = e.message; }
 }
@@ -660,7 +660,7 @@ function callsTable(list, opts2 = {}){
       <td>${c.direction==='IN'?'⬇':'⬆'}</td><td class="nowrap">${esc(localPhone(c.phone))}<div class="small muted">${esc(c.operator)}</div></td>
       <td>${esc(c.product||'')}<div class="small muted">${esc(c.station||'')}</div></td><td>${esc(c.category||'—')}${c.source==='IMPORT'?`<div><span class="badge blue">Google Forms</span></div>${c.legacy_reason?`<div class="small muted">Form: ${esc(c.legacy_reason)}</div>`:''}`:''}</td>
       <td>${outBadge(c.outcome)}${c.escalation_id?`<div class="small">#${c.escalation_id} ${escBadge(c.escalation_status)}</div>`:''}</td>
-      <td class="note small">${c.source==='IMPORT'&&!c.issue_note?'<span class="muted">(no notes — Google Forms)</span>':esc(c.issue_note||'')}${c.action_note?`<div class="muted">→ ${esc(c.action_note)}</div>`:''}${c.ref_no?`<div>Ref: ${esc(c.ref_no)}${c.amount?' · K'+esc(c.amount):''}</div>`:''}</td>
+      <td class="note small">${c.source==='IMPORT'&&!c.issue_note?'<span class="muted">(no notes — Google Forms)</span>':esc(c.issue_note||'')}${c.action_note?`<div class="muted">→ ${esc(c.action_note)}</div>`:''}${c.ref_no?`<div>MoMo # / Txn ID: ${esc(c.ref_no)}${c.amount?' · K'+esc(c.amount):''}</div>`:''}</td>
       <td>${dur(c.duration_sec)}</td></tr>`).join('') + '</tbody></table></div>';
 }
 function bindEscRows(box){ box.querySelectorAll('tr[data-esc]').forEach(tr => tr.onclick = () => openEsc(tr.dataset.esc)); }
@@ -717,7 +717,7 @@ async function openEsc(id){
         <div>Caller</div><div>${esc(localPhone(c.phone))} (${esc(c.operator)}) ${c.caller_name?'· '+esc(c.caller_name):''} · ${esc(c.caller_type)}</div>
         <div>Product</div><div>${esc(c.product||'')} ${c.station?'· '+esc(c.station):''}</div>
         <div>Reason</div><div>${esc(c.category||'')}</div>
-        ${c.ref_no||c.amount?`<div>Ref / amount</div><div>${esc(c.ref_no||'')} ${c.amount?'· K'+esc(c.amount):''}</div>`:''}
+        ${c.ref_no||c.amount?`<div>MoMo # / Txn ID</div><div>${esc(c.ref_no||'')} ${c.amount?'· K'+esc(c.amount):''}</div>`:''}
         <div>Other calls</div><div>${e.other_calls_from_number} from this number</div>
       </div>
       <div class="section-title">Caller said</div><div class="note">${esc(c.issue_note)}</div>
