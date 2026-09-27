@@ -157,9 +157,6 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
             <div class="field"><label>Name (optional)</label><input id="fName" maxlength="80"></div>
           </div>
 
-          <div class="section-title">Call result <span class="req">*</span></div>
-          <div class="pills" id="outcomePills"></div>
-
           <div id="convBlock">
             <div class="section-title">What is it about</div>
             <div class="row">
@@ -184,6 +181,9 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
               <div class="hint"><span id="actionHelp"></span><span id="actionCount"></span></div></div>
             </div>
           </div>
+          <div class="section-title">How did the call end? <span class="req">*</span></div>
+          <div class="pills" id="outcomePills" style="margin-bottom:12px"></div>
+
           <div id="failBlock" class="hidden">
             <div class="field"><label>Note (optional)</label><input id="fFailNote" maxlength="300"></div>
           </div>
@@ -195,7 +195,7 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
               <div class="field"><label>Priority <span class="req">*</span></label>
                 <select id="fEscPrio"><option value="">— choose —</option><option value="HIGH">High — money / system down (4 hrs)</option><option value="MEDIUM">Medium (24 hrs)</option><option value="LOW">Low (3 days)</option></select></div>
             </div>
-            <div class="field"><label>Why can't it be resolved at the call centre? <span class="req">*</span></label><textarea id="fEscReason" placeholder="What you checked, what is needed from the department"></textarea><div class="hint"><span>Min 25 characters</span><span id="escCount"></span></div></div>
+            <div class="field"><label>Why can't it be resolved at the call centre? <span class="req">*</span></label><textarea id="fEscReason" placeholder="What you checked, what is needed from the department"></textarea><div class="hint"><span>What you checked and what is needed from the department.</span></div></div>
           </div>
           <div id="fuBlock" class="fubox hidden">
             <h3 style="color:var(--amber)">Call-back</h3>
@@ -316,7 +316,7 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
       </div>
       <div class="card">
         <h2>Call reasons</h2>
-        <p class="muted small" style="margin-top:0">Agents can only pick from this list. "Needs ref" forces a MoMo/transaction reference or amount. "Min note" is the minimum characters per note box. The department is the default escalation route.</p>
+        <p class="muted small" style="margin-top:0">Agents can only pick from this list. "Needs ref" forces a MoMo/transaction reference or amount. The department is the default escalation route.</p>
         <div id="catBox"></div>
         <div class="section-title">Add / edit reason</div>
         <div id="cErr" class="alert err hidden"></div>
@@ -326,7 +326,7 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
           <div><label>Product</label><select id="cProd"><option value="BOTH">Both</option><option value="ZAM818">ZAM818</option><option value="MEDIA">Media</option></select></div>
           <div style="flex-basis:260px"><label>Reason name</label><input id="cName" maxlength="80"></div>
           <div><label>Escalates to</label><select id="cDept"></select></div>
-          <div style="flex:0 0 100px"><label>Min note</label><input id="cMin" type="number" min="15" value="20"></div>
+          <input type="hidden" id="cMin" value="20">
           <div style="flex:0 0 90px"><label>Sort</label><input id="cSort" type="number" value="100"></div>
           <div style="flex:0 0 auto"><label><input type="checkbox" id="cRef" style="width:auto"> Needs ref</label><label><input type="checkbox" id="cActive" style="width:auto" checked> Active</label></div>
         </div>
@@ -578,14 +578,8 @@ function syncForm(){
   noteCounts();
 }
 function noteCounts(){
-  const m = S.outcome === 'PRANK' ? 10 : minNote();
-  [['fIssue','issueCount','issueHelp'],['fAction','actionCount','actionHelp']].forEach(([f,cnt,help]) => {
-    const n = $(f).value.trim().length;
-    $(cnt).innerHTML = `<span class="${n>=m?'good':'bad'}">${n} / ${m} min</span>`;
-    $(help).textContent = 'Specific facts: dates, amounts, station, ticket/ref, what you checked.';
-  });
+  ['issueHelp','actionHelp'].forEach(h => $(h).textContent = 'Specific facts: dates, amounts, station, ticket/ref, what you checked.');
   $('lblAction').parentElement.classList.toggle('hidden', S.outcome === 'PRANK');
-  const e = $('fEscReason').value.trim().length; $('escCount').innerHTML = `<span class="${e>=25?'good':'bad'}">${e} / 25</span>`;
 }
 ['fIssue','fAction','fEscReason'].forEach(i => $(i).addEventListener('input', noteCounts));
 
@@ -683,7 +677,7 @@ async function loadFollowups(){
   $('fuBox').innerHTML = `<div class="tablewrap"><table><thead><tr><th>Due</th><th>Agent</th><th>Phone</th><th>Reason</th><th>Notes</th><th style="width:320px">Close call-back</th></tr></thead><tbody>` +
     list.map(c => { const late = new Date(c.followup_due) < new Date(); return `<tr><td class="nowrap">${fmtDT(c.followup_due)} ${late?'<span class="badge red">late</span>':''}</td><td>${esc(c.agent)}</td>
       <td class="nowrap">${esc(localPhone(c.phone))}</td><td>${esc(c.category||'')}</td><td class="note small">${esc(c.issue_note||'')}<div class="muted">→ ${esc(c.action_note||'')}</div></td>
-      <td><textarea id="fu-${c.id}" placeholder="Result of the call-back (min 20 chars)" style="min-height:50px"></textarea><button class="btn sm" data-fu="${c.id}" style="margin-top:4px">Mark done</button> <span class="small" id="fuerr-${c.id}" style="color:var(--red)"></span></td></tr>`; }).join('') + '</tbody></table></div>';
+      <td><textarea id="fu-${c.id}" placeholder="Result of the call-back" style="min-height:50px"></textarea><button class="btn sm" data-fu="${c.id}" style="margin-top:4px">Mark done</button> <span class="small" id="fuerr-${c.id}" style="color:var(--red)"></span></td></tr>`; }).join('') + '</tbody></table></div>';
   $('fuBox').querySelectorAll('button[data-fu]').forEach(b => b.onclick = async () => {
     const id = b.dataset.fu;
     try { await api('api_followup_done', { p_token: T(), p_call_id: +id, p_note: $('fu-' + id).value }); toast('Call-back closed'); loadFollowups(); refreshCounts(); }
@@ -877,8 +871,8 @@ $('rpBtn').onclick = async () => {
    ===================================================================== */
 async function loadSetup(){
   S.ref = await api('api_bootstrap', { p_token: T() });
-  $('catBox').innerHTML = `<div class="tablewrap" style="max-height:420px"><table><thead><tr><th>Dir</th><th>Product</th><th>Reason</th><th>Escalates to</th><th>Needs ref</th><th>Min note</th><th>Sort</th><th>Active</th><th></th></tr></thead><tbody>` +
-    S.ref.categories.map(c => `<tr><td>${c.direction==='IN'?'⬇ In':'⬆ Out'}</td><td>${esc(c.product)}</td><td>${esc(c.name)}</td><td>${esc(deptName(c.dept_code))}</td><td>${c.needs_ref?'Yes':''}</td><td>${c.min_note}</td><td>${c.sort}</td><td>${c.active?'✓':'—'}</td><td><button class="btn sec sm" data-c='${esc(JSON.stringify(c))}'>Edit</button></td></tr>`).join('') + '</tbody></table></div>';
+  $('catBox').innerHTML = `<div class="tablewrap" style="max-height:420px"><table><thead><tr><th>Dir</th><th>Product</th><th>Reason</th><th>Escalates to</th><th>Needs ref</th><th>Sort</th><th>Active</th><th></th></tr></thead><tbody>` +
+    S.ref.categories.map(c => `<tr><td>${c.direction==='IN'?'⬇ In':'⬆ Out'}</td><td>${esc(c.product)}</td><td>${esc(c.name)}</td><td>${esc(deptName(c.dept_code))}</td><td>${c.needs_ref?'Yes':''}</td><td>${c.sort}</td><td>${c.active?'✓':'—'}</td><td><button class="btn sec sm" data-c='${esc(JSON.stringify(c))}'>Edit</button></td></tr>`).join('') + '</tbody></table></div>';
   $('catBox').querySelectorAll('button[data-c]').forEach(b => b.onclick = () => editCat(JSON.parse(b.dataset.c)));
   $('stBox').innerHTML = `<table><thead><tr><th>Name</th><th>Product</th><th>USSD</th><th>Active</th><th></th></tr></thead><tbody>` +
     S.ref.stations.map(s => `<tr><td>${esc(s.name)}</td><td>${esc(s.product)}</td><td>${esc(s.ussd_code||'')}</td><td>${s.active?'✓':'—'}</td><td><button class="btn sec sm" data-s='${esc(JSON.stringify(s))}'>Edit</button></td></tr>`).join('') + '</tbody></table>';
