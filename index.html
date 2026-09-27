@@ -248,6 +248,7 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
           <h2 style="flex:1 1 auto">Performance dashboard</h2>
           <div style="flex:0 0 150px"><label>From</label><input type="date" id="dFrom"></div>
           <div style="flex:0 0 150px"><label>To</label><input type="date" id="dTo"></div>
+          <div style="flex:0 0 auto"><label style="font-weight:600"><input type="checkbox" id="dImport" style="width:auto"> Include Google Forms history</label></div>
           <div style="flex:0 0 auto" class="pills"><button class="pill" data-range="0">Today</button><button class="pill" data-range="6">7 days</button><button class="pill" data-range="29">30 days</button></div>
         </div>
       </div>
@@ -262,6 +263,7 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
           <div><label>From</label><input type="date" id="lFrom"></div>
           <div><label>To</label><input type="date" id="lTo"></div>
           <div><label>Agent</label><select id="lAgent"></select></div>
+          <div><label>Source</label><select id="lSource"><option value="">All</option><option value="APP">New platform</option><option value="IMPORT">Google Forms import</option></select></div>
           <div><label>Direction</label><select id="lDir"><option value="">All</option><option value="IN">Inbound</option><option value="OUT">Outbound</option></select></div>
           <div><label>Product</label><select id="lProd"><option value="">All</option><option value="ZAM818">ZAM818</option><option value="MEDIA">Media</option><option value="GENERAL">General</option></select></div>
           <div><label>Station</label><select id="lStation"></select></div>
@@ -300,6 +302,18 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
 
     <!-- SETUP (master) -->
     <section id="tab-setup" class="tab hidden">
+      <div class="card">
+        <h2>Import Google Forms call log</h2>
+        <p class="muted small" style="margin-top:0">Upload the CSV export of the old Google Form responses (File → Download → CSV). You can upload again later with newer data — rows already imported are skipped automatically.
+        Imported calls feed caller history, the call log and (optionally) the dashboard. They never appear in Escalations or Call-backs — to see old escalations use <b>Call log → Source: Google Forms import → Outcome: Escalate</b>.</p>
+        <div class="row">
+          <div style="flex:1 1 320px"><label>CSV file</label><input type="file" id="impFile" accept=".csv,text/csv"></div>
+          <div style="flex:0 0 auto"><button class="btn" id="impGo" disabled>Import</button></div>
+        </div>
+        <div id="impErr" class="alert err hidden" style="margin-top:10px"></div>
+        <div id="impPreview" class="small" style="margin-top:10px"></div>
+        <div id="impResult" style="margin-top:10px"></div>
+      </div>
       <div class="card">
         <h2>Call reasons</h2>
         <p class="muted small" style="margin-top:0">Agents can only pick from this list. "Needs ref" forces a MoMo/transaction reference or amount. "Min note" is the minimum characters per note box. The department is the default escalation route.</p>
@@ -601,7 +615,7 @@ async function loadHistory(ph){
     if (!h.calls.length) html += '<div class="muted">New caller — no previous calls.</div>';
     html += h.calls.map(c => `<div class="hitem ${c.escalation_id?'esc':''} ${c.outcome==='FOLLOW_UP'&&!c.followup_done_at?'fu':''}">
       <div class="small muted">${fmtDT(c.created_at)} · ${esc(c.agent)} · ${c.direction==='IN'?'⬇ in':'⬆ out'} ${c.station?'· '+esc(c.station):''}</div>
-      <div><b>${esc(c.category || '—')}</b> ${outBadge(c.outcome)} ${c.escalation_id?'#'+c.escalation_id+' '+escBadge(c.escalation_status):''}</div>
+      <div><b>${esc(c.category || '—')}</b> ${outBadge(c.outcome)} ${c.source==='IMPORT'?'<span class="badge blue">Google Forms</span>':''} ${c.escalation_id?'#'+c.escalation_id+' '+escBadge(c.escalation_status):''}</div>
       ${c.issue_note?`<div class="small">${esc(c.issue_note)}</div>`:''}${c.action_note?`<div class="small muted">→ ${esc(c.action_note)}</div>`:''}
       ${c.ref_no?`<div class="small">Ref: ${esc(c.ref_no)}</div>`:''}</div>`).join('');
     $('histBox').innerHTML = html;
@@ -650,9 +664,9 @@ function callsTable(list, opts2 = {}){
   return `<div class="tablewrap"><table><thead><tr><th>Time</th>${opts2.agent?'<th>Agent</th>':''}<th></th><th>Phone</th><th>Product / station</th><th>Reason</th><th>Result</th><th>Notes</th><th>Dur.</th></tr></thead><tbody>` +
     list.map(c => `<tr ${c.escalation_id?`class="click" data-esc="${c.escalation_id}"`:''}><td class="nowrap">${fmtDT(c.created_at)}</td>${opts2.agent?`<td>${esc(c.agent)}</td>`:''}
       <td>${c.direction==='IN'?'⬇':'⬆'}</td><td class="nowrap">${esc(localPhone(c.phone))}<div class="small muted">${esc(c.operator)}</div></td>
-      <td>${esc(c.product||'')}<div class="small muted">${esc(c.station||'')}</div></td><td>${esc(c.category||'—')}</td>
+      <td>${esc(c.product||'')}<div class="small muted">${esc(c.station||'')}</div></td><td>${esc(c.category||'—')}${c.source==='IMPORT'?`<div><span class="badge blue">Google Forms</span></div>${c.legacy_reason?`<div class="small muted">Form: ${esc(c.legacy_reason)}</div>`:''}`:''}</td>
       <td>${outBadge(c.outcome)}${c.escalation_id?`<div class="small">#${c.escalation_id} ${escBadge(c.escalation_status)}</div>`:''}</td>
-      <td class="note small">${esc(c.issue_note||'')}${c.action_note?`<div class="muted">→ ${esc(c.action_note)}</div>`:''}${c.ref_no?`<div>Ref: ${esc(c.ref_no)}${c.amount?' · K'+esc(c.amount):''}</div>`:''}</td>
+      <td class="note small">${c.source==='IMPORT'&&!c.issue_note?'<span class="muted">(no notes — Google Forms)</span>':esc(c.issue_note||'')}${c.action_note?`<div class="muted">→ ${esc(c.action_note)}</div>`:''}${c.ref_no?`<div>Ref: ${esc(c.ref_no)}${c.amount?' · K'+esc(c.amount):''}</div>`:''}</td>
       <td>${dur(c.duration_sec)}</td></tr>`).join('') + '</tbody></table></div>';
 }
 function bindEscRows(box){ box.querySelectorAll('tr[data-esc]').forEach(tr => tr.onclick = () => openEsc(tr.dataset.esc)); }
@@ -752,7 +766,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
    DASHBOARD
    ===================================================================== */
 document.querySelectorAll('[data-range]').forEach(b => b.onclick = () => { $('dFrom').value = todayISO(+b.dataset.range); $('dTo').value = todayISO(0); loadDash(); });
-$('dFrom').onchange = loadDash; $('dTo').onchange = loadDash;
+$('dFrom').onchange = loadDash; $('dTo').onchange = loadDash; $('dImport').onchange = loadDash;
 function barChart(rows, keys, colors, labelFn, h = 160){
   if (!rows.length) return '<div class="muted small">No data</div>';
   const W = Math.max(rows.length * 34, 420), max = Math.max(1, ...rows.map(r => keys.reduce((s,k) => s + (r[k]||0), 0)));
@@ -772,11 +786,13 @@ const pct = v => v == null ? '—' : v + '%';
 async function loadDash(){
   if (!$('dFrom').value) { $('dFrom').value = todayISO(6); $('dTo').value = todayISO(0); }
   $('dashBox').innerHTML = '<div class="card muted">Loading…</div>';
-  let s; try { s = await api('api_stats', { p_token: T(), p_from: $('dFrom').value, p_to: $('dTo').value }); } catch(e) { $('dashBox').innerHTML = `<div class="alert err">${esc(e.message)}</div>`; return; }
+  let s; try { s = await api('api_stats', { p_token: T(), p_from: $('dFrom').value, p_to: $('dTo').value, p_include_import: $('dImport').checked }); } catch(e) { $('dashBox').innerHTML = `<div class="alert err">${esc(e.message)}</div>`; return; }
   const t = s.totals, E = s.escalations;
   const kpi = (v, l, warn) => `<div class="kpi ${warn?'warn':''}"><div class="v">${v ?? 0}</div><div class="l">${l}</div></div>`;
   const talked = t.calls - t.failed;
-  let html = `<div class="kpis">
+  let html = s.range.include_import ? `<div class="alert ok">Including ${s.imported_in_range} Google Forms calls in totals, charts and reasons. Agent performance below uses new-platform calls only.</div>`
+    : (s.imported_in_range ? `<p class="small muted">${s.imported_in_range} Google Forms calls in this period are excluded — tick "Include Google Forms history" to add them.</p>` : '');
+  html += `<div class="kpis">
     ${kpi(t.calls,'Total calls')}${kpi(t.inbound,'Inbound')}${kpi(t.outbound,'Outbound')}${kpi(t.unique_numbers,'Unique numbers')}
     ${kpi(talked ? Math.round(t.resolved/talked*100)+'%' : '—','Resolved on the call')}${kpi(t.escalated,'Escalated')}
     ${kpi(pct(t.repeat_rate),'Called back within 7 days after "resolved"')}${kpi(dur(t.avg_duration_sec)||'—','Avg call duration')}
@@ -784,7 +800,7 @@ async function loadDash(){
   const maxA = Math.max(1, ...s.agents.map(a => a.calls));
   html += `<div class="card"><h3>Agent performance</h3><div class="tablewrap"><table><thead><tr><th>Agent</th><th>Calls</th><th style="width:140px"></th><th>In</th><th>Out</th><th>Resolved %</th><th>Escalated</th><th>Esc. %</th><th>No-conversation</th><th>Repeat within 7d</th><th>Avg dur.</th><th>Avg note chars</th><th>Call-backs open / late</th><th>Days active</th></tr></thead><tbody>` +
     (s.agents.map(a => `<tr><td><b>${esc(a.agent)}</b></td><td>${a.calls}</td><td>${hbar(a.calls,maxA)}</td><td>${a.inbound}</td><td>${a.outbound}</td><td>${pct(a.resolved_pct)}</td><td>${a.escalated}</td><td>${pct(a.escalation_pct)}</td><td>${a.failed}</td><td>${pct(a.repeat_rate)}</td><td>${dur(a.avg_duration_sec)}</td><td>${a.avg_note_chars ?? '—'}</td><td>${a.followups_open} / <span style="color:${a.followups_overdue?'var(--red)':'inherit'}">${a.followups_overdue}</span></td><td>${a.active_days}</td></tr>`).join('') || '<tr><td colspan="14" class="muted">No calls in this period</td></tr>') +
-    `</tbody></table></div><p class="small muted">Repeat within 7d = share of calls marked "Resolved" where the same number called in again within 7 days — a high figure suggests the issue was not really resolved. Avg note chars = combined length of both note boxes.</p></div>`;
+    `</tbody></table></div>${s.range.include_import && s.legacy_agents.length ? `<div class="section-title">Google Forms history by agent (not scored)</div><table style="max-width:420px"><tbody>${s.legacy_agents.map(a=>`<tr><td>${esc(a.agent||'(blank)')}</td><td class="right">${a.calls}</td></tr>`).join('')}</tbody></table>` : ''}<p class="small muted">Repeat within 7d = share of calls marked "Resolved" where the same number called in again within 7 days — a high figure suggests the issue was not really resolved. Avg note chars = combined length of both note boxes.</p></div>`;
   html += `<div class="grid2"><div class="card"><h3>Calls per day <span class="small muted">(<span style="color:#0e7a4d">■</span> in <span style="color:#1f5fa8">■</span> out)</span></h3>${barChart(s.daily, ['inbound','outbound'], ['#0e7a4d','#1f5fa8'], r => fmtD(r.day + 'T12:00:00'))}</div>
     <div class="card"><h3>Calls by hour of day</h3>${barChart(Array.from({length:24},(_,h)=>({hour:h,calls:(s.hourly.find(x=>x.hour===h)||{}).calls||0})).filter(r=>r.hour>=5&&r.hour<=22), ['calls'], ['#0e7a4d'], r => String(r.hour).padStart(2,'0'))}</div></div>`;
   const maxC = Math.max(1, ...s.categories.map(c => c.calls));
@@ -808,7 +824,7 @@ let lastLog = [];
 $('lGo').onclick = loadLog;
 async function loadLog(){
   if (!$('lFrom').value) { $('lFrom').value = todayISO(6); $('lTo').value = todayISO(0); }
-  const p = { from: $('lFrom').value, to: $('lTo').value, agent_id: $('lAgent').value, direction: $('lDir').value, product: $('lProd').value,
+  const p = { from: $('lFrom').value, to: $('lTo').value, source: $('lSource').value, agent_id: $('lAgent').value, direction: $('lDir').value, product: $('lProd').value,
     station_id: $('lStation').value, category_id: $('lCat').value, outcome: $('lOutcome').value, phone: $('lPhone').value, text: $('lText').value };
   try { lastLog = await api('api_calls_search', { p_token: T(), p }); } catch(e) { $('logBox').innerHTML = `<div class="alert err">${esc(e.message)}</div>`; return; }
   $('lCount').textContent = lastLog.length + ' calls' + (lastLog.length >= 5000 ? ' (limit reached — narrow the dates)' : '');
@@ -816,7 +832,7 @@ async function loadLog(){
 }
 $('lCsv').onclick = () => {
   if (!lastLog.length) return toast('Search first');
-  const cols = ['id','created_at','agent','direction','product','station','phone','operator','caller_type','caller_name','category','outcome','issue_note','action_note','ref_no','amount','duration_sec','followup_due','followup_done_at','followup_note','escalation_id','escalation_status'];
+  const cols = ['id','source','created_at','agent','direction','product','station','phone','operator','caller_type','caller_name','category','legacy_reason','outcome','issue_note','action_note','ref_no','amount','duration_sec','followup_due','followup_done_at','followup_note','escalation_id','escalation_status'];
   const q = v => { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; };
   const rows = lastLog.map(c => cols.map(k => q(k === 'created_at' ? new Date(c[k]).toLocaleString('en-GB',{timeZone:TZ}) : k === 'phone' ? localPhone(c[k]) : c[k])).join(','));
   const blob = new Blob(['﻿' + cols.join(',') + '\n' + rows.join('\n')], { type: 'text/csv' });
@@ -880,6 +896,91 @@ $('sSave').onclick = async () => {
   hideErr($('sErr'));
   const p = { id:$('sId').value||null, name:$('sName').value, product:$('sProd').value, ussd_code:$('sUssd').value, active:$('sActive').checked };
   try { await api('api_station_save', { p_token: T(), p }); toast('Station saved'); editSt(null); await loadSetup(); fillStatic(); } catch(e) { showErr($('sErr'), e.message); }
+};
+
+/* =====================================================================
+   IMPORT GOOGLE FORMS CSV (master)
+   ===================================================================== */
+function parseCSV(text){
+  text = text.replace(/^﻿/, '');
+  const rows = []; let row = [], f = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) {
+      if (ch === '"') { if (text[i+1] === '"') { f += '"'; i++; } else q = false; }
+      else f += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === ',') { row.push(f); f = ''; }
+    else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i+1] === '\n') i++; row.push(f); rows.push(row); row = []; f = ''; }
+    else f += ch;
+  }
+  if (f !== '' || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim() !== ''));
+}
+// Google Forms timestamps: "2026/07/13 8:40:44 AM GMT+1", "7/13/2026 8:40:44", "13/07/2026 08:40:44"
+function parseTs(raw, dayFirst){
+  const t = String(raw || '').trim();
+  let m = t.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})[ T]+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?\s*(?:GMT|UTC)?\s*([+-]\d{1,2})?(?::?(\d{2}))?$/i);
+  let y, mo, d, h, mi, se, ap, tzh, tzm;
+  if (m) { [, y, mo, d, h, mi, se, ap, tzh, tzm] = m; }
+  else {
+    m = t.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})[ T]+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?\s*(?:GMT|UTC)?\s*([+-]\d{1,2})?(?::?(\d{2}))?$/i);
+    if (!m) return null;
+    let a, b; [, a, b, y, h, mi, se, ap, tzh, tzm] = m;
+    if (dayFirst) { d = a; mo = b; } else { mo = a; d = b; }
+  }
+  h = +h; if (ap) { ap = ap.toUpperCase(); if (ap === 'PM' && h < 12) h += 12; if (ap === 'AM' && h === 12) h = 0; }
+  if (+mo < 1 || +mo > 12 || +d < 1 || +d > 31 || h > 23) return null;
+  const tz = tzh != null ? (tzh[0] + String(Math.abs(+tzh)).padStart(2,'0') + ':' + (tzm || '00')) : '+02:00';   // default Zambia time
+  const p2 = v => String(v).padStart(2,'0');
+  const iso = `${y}-${p2(mo)}-${p2(d)}T${p2(h)}:${p2(mi)}:${p2(se||0)}${tz}`;
+  return isNaN(new Date(iso)) ? null : iso;
+}
+let IMP = null;
+$('impFile').onchange = async () => {
+  hideErr($('impErr')); $('impPreview').innerHTML = ''; $('impResult').innerHTML = ''; $('impGo').disabled = true; IMP = null;
+  const file = $('impFile').files[0]; if (!file) return;
+  const rows = parseCSV(await file.text());
+  if (rows.length < 2) return showErr($('impErr'), 'The file looks empty.');
+  const head = rows[0].map(h => h.trim().toLowerCase());
+  const col = key => head.findIndex(h => h.includes(key));
+  const C = { ts: col('timestamp'), agent: col('agent'), station: col('station'), phone: col('phone'), reason: col('reason'), outcome: col('outcome'), notes: col('note') };
+  const missing = Object.entries(C).filter(([k, v]) => v < 0 && k !== 'notes').map(([k]) => k);
+  if (missing.length) return showErr($('impErr'), 'Could not find these columns in the file: ' + missing.join(', ') + '. Expected the Google Form export (Timestamp, Agent, Station, Caller Phone Number, Reason for Call, Call Outcome, Notes).');
+  const data = rows.slice(1);
+  const dayFirst = data.some(r => { const mm = String(r[C.ts]||'').trim().match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-]\d{4}/); return mm && +mm[1] > 12; });
+  const out = [], bad = [];
+  data.forEach((r, i) => {
+    const iso = parseTs(r[C.ts], dayFirst);
+    if (!iso) { bad.push(i + 2); return; }
+    out.push({ row: i + 2, ts: iso, ts_raw: String(r[C.ts]).trim(), agent: r[C.agent], station: r[C.station], phone: r[C.phone], reason: r[C.reason], outcome: r[C.outcome], notes: C.notes >= 0 ? r[C.notes] : '' });
+  });
+  if (!out.length) return showErr($('impErr'), 'No row had a readable timestamp.');
+  const times = out.map(o => new Date(o.ts)).sort((a, b) => a - b);
+  const count = k => { const m = {}; out.forEach(o => { const v = String(o[k]||'').trim() || '(blank)'; m[v] = (m[v]||0) + 1; }); return Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `${esc(k)} (${v})`).join(', '); };
+  $('impPreview').innerHTML = `<div class="kv">
+    <div>Rows ready</div><div><b>${out.length}</b>${bad.length ? ` · <span style="color:var(--red)">${bad.length} skipped — unreadable timestamp (rows ${bad.slice(0,10).join(', ')}${bad.length>10?'…':''})</span>` : ''}</div>
+    <div>Date range</div><div>${fmtDT(times[0])} → ${fmtDT(times[times.length-1])} <span class="muted">(Zambia time — check this looks right)</span></div>
+    <div>Agents</div><div>${count('agent')}</div>
+    <div>Stations</div><div>${count('station')}</div>
+    <div>Outcomes</div><div>${count('outcome')}</div></div>`;
+  IMP = out; $('impGo').disabled = false;
+};
+$('impGo').onclick = async () => {
+  if (!IMP) return;
+  $('impGo').disabled = true; $('impFile').disabled = true; hideErr($('impErr'));
+  const tot = { inserted: 0, duplicates: 0, failed: 0, errors: [] }; let last = null;
+  try {
+    for (let i = 0; i < IMP.length; i += 500) {
+      $('impResult').innerHTML = `<div class="muted">Importing… ${Math.min(i + 500, IMP.length)} / ${IMP.length}</div>`;
+      last = await api('api_import_calls', { p_token: T(), p_rows: IMP.slice(i, i + 500) });
+      tot.inserted += last.inserted; tot.duplicates += last.duplicates; tot.failed += last.failed; tot.errors.push(...last.errors);
+    }
+    $('impResult').innerHTML = `<div class="alert ok">Done — ${tot.inserted} new calls imported, ${tot.duplicates} already there (skipped)${tot.failed ? `, <span style="color:var(--red)">${tot.failed} failed</span>` : ''}. Total Google Forms calls in the system: ${last.total_imported}.</div>` +
+      (tot.errors.length ? `<div class="small">${tot.errors.slice(0,20).map(e => `Row ${e.row}: ${esc(e.error)}`).join('<br>')}</div>` : '');
+    IMP = null; $('impFile').value = ''; $('impPreview').innerHTML = '';
+  } catch(e) { showErr($('impErr'), e.message + ' — you can safely upload the same file again; imported rows will be skipped.'); $('impGo').disabled = false; }
+  finally { $('impFile').disabled = false; }
 };
 
 /* ---------- warn before leaving with an unsaved call ---------- */
