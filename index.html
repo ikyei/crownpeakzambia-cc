@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crown Peak Games Zambia · Call Centre</title>
+<style>
+:root{
+  --bg:#f4f6f9; --card:#fff; --ink:#1b2430; --muted:#5f6b7a; --line:#dde3ea;
+  --brand:#0b5d3b; --brand-2:#0e7a4d; --brand-soft:#e5f3ec;
+  --red:#c0392b; --red-soft:#fdecea; --amber:#b7791f; --amber-soft:#fdf3e1;
+  --blue:#1f5fa8; --blue-soft:#e8f0fa; --grey-soft:#eef1f4;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{margin:0 0 8px;line-height:1.2} h2{font-size:18px} h3{font-size:15px}
+.hidden{display:none!important}
+.muted{color:var(--muted)} .small{font-size:12px} .right{text-align:right} .nowrap{white-space:nowrap}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.row>*{flex:1 1 180px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.split-a{grid-template-columns:1.35fr 1fr}.split-b{grid-template-columns:1.6fr 1fr}
+@media(max-width:900px){.grid2,.split-a,.split-b{grid-template-columns:1fr}
+  header nav{flex:1 1 100%;order:3;flex-wrap:nowrap;overflow-x:auto} header nav button{white-space:nowrap}
+  main{padding:12px} .seg button{padding:9px 12px}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:16px}
+label{display:block;font-weight:600;font-size:13px;margin-bottom:4px}
+label .req{color:var(--red)}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid #c7d0da;border-radius:8px;background:#fff}
+textarea{min-height:70px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--brand-2);outline-offset:-1px;border-color:var(--brand-2)}
+.field{margin-bottom:12px}
+.hint{font-size:12px;color:var(--muted);margin-top:3px;display:flex;justify-content:space-between;gap:8px}
+.hint .bad{color:var(--red)} .hint .good{color:var(--brand-2)}
+.btn{border:0;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer;background:var(--brand);color:#fff}
+.btn:hover{background:var(--brand-2)} .btn:disabled{opacity:.5;cursor:default}
+.btn.sec{background:#fff;color:var(--ink);border:1px solid #c7d0da} .btn.sec:hover{background:var(--grey-soft)}
+.btn.red{background:var(--red)} .btn.sm{padding:5px 10px;font-size:12px}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{border:1px solid #c7d0da;background:#fff;border-radius:999px;padding:6px 12px;cursor:pointer;font-weight:600;font-size:13px}
+.pill.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.pill.fail.on{background:#6b7785;border-color:#6b7785}
+.pill.esc.on{background:var(--red);border-color:var(--red)}
+.pill.fu.on{background:var(--amber);border-color:var(--amber)}
+.seg{display:inline-flex;border:1px solid #c7d0da;border-radius:10px;overflow:hidden}
+.seg button{border:0;background:#fff;padding:9px 18px;font-weight:700;cursor:pointer}
+.seg button.on{background:var(--brand);color:#fff}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:var(--grey-soft);color:var(--muted);white-space:nowrap}
+.badge.red{background:var(--red-soft);color:var(--red)} .badge.amber{background:var(--amber-soft);color:var(--amber)}
+.badge.green{background:var(--brand-soft);color:var(--brand)} .badge.blue{background:var(--blue-soft);color:var(--blue)}
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:700;background:#fafbfc;position:sticky;top:0}
+tr.click{cursor:pointer} tr.click:hover td{background:#f7faf8}
+.tablewrap{overflow:auto;max-height:620px;border:1px solid var(--line);border-radius:8px}
+.note{white-space:pre-wrap;max-width:420px}
+/* layout */
+header{background:var(--brand);color:#fff;padding:10px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+header .logo{font-weight:800;font-size:16px;letter-spacing:.3px}
+header nav{display:flex;gap:4px;flex-wrap:wrap;flex:1}
+header nav button{background:transparent;border:0;color:#d6efe3;padding:8px 12px;border-radius:8px;font-weight:600;cursor:pointer}
+header nav button.on,header nav button:hover{background:rgba(255,255,255,.15);color:#fff}
+header .who{font-size:13px;display:flex;gap:10px;align-items:center}
+header .who button{background:rgba(255,255,255,.15);border:0;color:#fff;padding:6px 10px;border-radius:8px;cursor:pointer}
+main{max-width:1280px;margin:0 auto;padding:20px}
+.count{background:var(--red);color:#fff;border-radius:999px;padding:0 6px;font-size:11px;margin-left:4px}
+/* login */
+.login{max-width:380px;margin:9vh auto}
+.login .card{padding:24px}
+.brandbar{height:6px;background:linear-gradient(90deg,var(--brand),#f2b705);border-radius:6px;margin-bottom:18px}
+/* alerts */
+.alert{padding:10px 12px;border-radius:8px;margin-bottom:12px;font-weight:600}
+.alert.err{background:var(--red-soft);color:var(--red)} .alert.ok{background:var(--brand-soft);color:var(--brand)}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;font-weight:600;z-index:99;display:none}
+/* call form */
+.timer{font-variant-numeric:tabular-nums;font-weight:800;font-size:20px}
+.history{max-height:560px;overflow:auto}
+.hitem{border-left:3px solid var(--line);padding:6px 10px;margin-bottom:8px;background:#fafbfc;border-radius:0 6px 6px 0}
+.hitem.esc{border-color:var(--red)} .hitem.fu{border-color:var(--amber)}
+.section-title{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:800;margin:14px 0 8px}
+.escbox{border:1px solid #f1c3bd;background:#fff8f7;border-radius:8px;padding:12px;margin-bottom:12px}
+.fubox{border:1px solid #f0d9a8;background:#fffbf2;border-radius:8px;padding:12px;margin-bottom:12px}
+/* dashboard */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.kpi .v{font-size:24px;font-weight:800} .kpi .l{font-size:12px;color:var(--muted);font-weight:600}
+.kpi.warn .v{color:var(--red)}
+.bar{height:10px;background:var(--brand-2);border-radius:4px}
+.barbg{background:var(--grey-soft);border-radius:4px;width:100%}
+svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(15,23,32,.45);display:flex;align-items:flex-start;justify-content:center;padding:4vh 12px;z-index:50;overflow:auto}
+.modal .box{background:#fff;border-radius:12px;max-width:860px;width:100%;padding:20px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:4px 12px;font-size:13px} .kv div:nth-child(odd){color:var(--muted);font-weight:600}
+.log{border-left:2px solid var(--line);padding-left:12px}
+.log div{margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="loginView" class="login hidden">
+  <div class="card">
+    <div class="brandbar"></div>
+    <h2>Crown Peak Games Zambia</h2>
+    <p class="muted" style="margin-top:0">Call Centre · ZAM818 &amp; Media Games — sign in</p>
+    <div id="loginErr" class="alert err hidden"></div>
+    <div class="field"><label for="loginUser">Your name</label><select id="loginUser"></select></div>
+    <div class="field"><label for="loginPw">Password</label><input id="loginPw" type="password" autocomplete="current-password"></div>
+    <button class="btn" id="loginBtn" style="width:100%">Sign in</button>
+  </div>
+</div>
+
+<!-- ============ CHANGE PASSWORD ============ -->
+<div id="pwView" class="login hidden">
+  <div class="card">
+    <div class="brandbar"></div>
+    <h2>Set your own password</h2>
+    <p class="muted" style="margin-top:0" id="pwWhy">Please replace the starting password before you continue.</p>
+    <div id="pwErr" class="alert err hidden"></div>
+    <div class="field"><label>Current password</label><input id="pwOld" type="password"></div>
+    <div class="field"><label>New password (min 8 characters)</label><input id="pwNew" type="password"></div>
+    <div class="field"><label>Repeat new password</label><input id="pwNew2" type="password"></div>
+    <button class="btn" id="pwBtn" style="width:100%">Save password</button>
+    <button class="btn sec hidden" id="pwCancel" style="width:100%;margin-top:8px">Cancel</button>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="appView" class="hidden">
+  <header>
+    <div class="logo">Crown Peak Games Zambia · Call Centre</div>
+    <nav id="nav"></nav>
+    <div class="who"><span id="whoName"></span><button id="myPwBtn" title="Change password">Password</button><button id="logoutBtn">Log out</button></div>
+  </header>
+  <main>
+    <!-- NEW CALL -->
+    <section id="tab-call" class="tab">
+      <div class="grid2 split-a">
+        <div class="card">
+          <div class="row" style="align-items:center;margin-bottom:12px">
+            <div style="flex:0 0 auto" class="seg" id="dirSeg">
+              <button data-dir="IN" class="on">⬇ Inbound call</button><button data-dir="OUT">⬆ Outbound call</button>
+            </div>
+            <div style="flex:1 1 auto" class="right"><span class="muted small">Call timer</span> <span class="timer" id="timer">00:00</span>
+              <button class="btn sec sm" id="timerBtn">Start</button></div>
+          </div>
+          <div id="callErr" class="alert err hidden"></div>
+
+          <div class="section-title">Caller</div>
+          <div class="row">
+            <div class="field"><label>Phone number <span class="req">*</span></label><input id="fPhone" inputmode="tel" placeholder="e.g. 0977 123 456"><div class="hint"><span id="phoneHint"></span></div></div>
+            <div class="field"><label><span id="lblType">Who is calling</span> <span class="req">*</span></label>
+              <select id="fType"><option value="">— choose —</option><option value="PLAYER">Player / customer</option><option value="PROSPECT">Prospective customer</option><option value="AGENT">Sales agent</option><option value="PRESENTER">Presenter / station staff</option><option value="OTHER">Other</option></select></div>
+            <div class="field"><label>Name (optional)</label><input id="fName" maxlength="80"></div>
+          </div>
+
+          <div class="section-title">Call result <span class="req">*</span></div>
+          <div class="pills" id="outcomePills"></div>
+
+          <div id="convBlock">
+            <div class="section-title">What is it about</div>
+            <div class="row">
+              <div class="field" style="flex:0 0 auto"><label>Product <span class="req">*</span></label>
+                <div class="pills" id="productPills">
+                  <button class="pill" data-p="ZAM818">ZAM818 (5/90)</button><button class="pill" data-p="MEDIA">Media game</button><button class="pill" data-p="GENERAL">General</button>
+                </div></div>
+              <div class="field" id="stationWrap"><label>Station <span class="req">*</span></label><select id="fStation"></select></div>
+            </div>
+            <div class="field"><label><span id="lblReason">Reason for call</span> <span class="req">*</span></label><select id="fCat"></select></div>
+            <div class="row hidden" id="refWrap">
+              <div class="field"><label>MoMo / transaction / ticket ref <span class="req">*</span></label><input id="fRef" maxlength="80"></div>
+              <div class="field"><label>Amount (K)</label><input id="fAmt" type="number" min="0" step="0.01"></div>
+              <div class="hint" style="flex-basis:100%;margin-top:-8px"><span>Give the reference or the amount involved — finance cannot trace money without it.</span></div>
+            </div>
+            <div id="notesBlock">
+            <div class="field"><label id="lblIssue">What did the caller ask or report? <span class="req">*</span></label>
+              <textarea id="fIssue" placeholder="Be specific: e.g. 'Won K500 on Roots FM draw on 18 Sep, says money not received on Airtel'"></textarea>
+              <div class="hint"><span id="issueHelp"></span><span id="issueCount"></span></div></div>
+            <div class="field"><label id="lblAction">What did you tell them / do? <span class="req">*</span></label>
+              <textarea id="fAction" placeholder="e.g. 'Checked history, no payout visible. Escalated to Finance, told customer to expect a call within 24 hrs'"></textarea>
+              <div class="hint"><span id="actionHelp"></span><span id="actionCount"></span></div></div>
+            </div>
+          </div>
+          <div id="failBlock" class="hidden">
+            <div class="field"><label>Note (optional)</label><input id="fFailNote" maxlength="300"></div>
+          </div>
+
+          <div id="escBlock" class="escbox hidden">
+            <h3 style="color:var(--red)">Escalate to management</h3>
+            <div class="row">
+              <div class="field"><label>Department <span class="req">*</span></label><select id="fEscDept"></select></div>
+              <div class="field"><label>Priority <span class="req">*</span></label>
+                <select id="fEscPrio"><option value="">— choose —</option><option value="HIGH">High — money / system down (4 hrs)</option><option value="MEDIUM">Medium (24 hrs)</option><option value="LOW">Low (3 days)</option></select></div>
+            </div>
+            <div class="field"><label>Why can't it be resolved at the call centre? <span class="req">*</span></label><textarea id="fEscReason" placeholder="What you checked, what is needed from the department"></textarea><div class="hint"><span>Min 25 characters</span><span id="escCount"></span></div></div>
+          </div>
+          <div id="fuBlock" class="fubox hidden">
+            <h3 style="color:var(--amber)">Call-back</h3>
+            <div class="field" style="max-width:280px"><label>When will you call back? <span class="req">*</span></label><input id="fFuDue" type="datetime-local"></div>
+          </div>
+
+          <div class="row" style="margin-top:8px">
+            <button class="btn" id="saveCallBtn" style="flex:0 0 auto;padding:11px 26px">Save call</button>
+            <button class="btn sec" id="clearCallBtn" style="flex:0 0 auto">Clear</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Caller history</h3>
+          <div id="histBox" class="history muted">Type a phone number to see this caller's previous calls and open issues.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MY CALLS -->
+    <section id="tab-mycalls" class="tab hidden">
+      <div class="card">
+        <div class="row" style="align-items:center"><h2 style="flex:1 1 auto">My calls</h2>
+          <select id="myDays" style="flex:0 0 160px"><option value="1">Today</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option></select></div>
+        <div id="myCallsBox"></div>
+      </div>
+    </section>
+
+    <!-- FOLLOW-UPS -->
+    <section id="tab-followups" class="tab hidden">
+      <div class="card"><h2>Call-backs due</h2><div id="fuBox"></div></div>
+    </section>
+
+    <!-- ESCALATIONS -->
+    <section id="tab-esc" class="tab hidden">
+      <div class="card">
+        <div class="row" style="align-items:flex-end">
+          <h2 style="flex:1 1 auto" id="escTitle">Escalations</h2>
+          <div style="flex:0 0 170px"><label>Status</label><select id="escStatus"><option value="ACTIVE">Open + in progress</option><option value="OPEN">Open (untaken)</option><option value="IN_PROGRESS">In progress</option><option value="RESOLVED">Resolved</option><option value="ALL">All</option></select></div>
+          <div style="flex:0 0 200px" id="escDeptWrap"><label>Department</label><select id="escDept"></select></div>
+        </div>
+        <div id="escBox" style="margin-top:12px"></div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="tab-dash" class="tab hidden">
+      <div class="card">
+        <div class="row" style="align-items:flex-end">
+          <h2 style="flex:1 1 auto">Performance dashboard</h2>
+          <div style="flex:0 0 150px"><label>From</label><input type="date" id="dFrom"></div>
+          <div style="flex:0 0 150px"><label>To</label><input type="date" id="dTo"></div>
+          <div style="flex:0 0 auto" class="pills"><button class="pill" data-range="0">Today</button><button class="pill" data-range="6">7 days</button><button class="pill" data-range="29">30 days</button></div>
+        </div>
+      </div>
+      <div id="dashBox"></div>
+    </section>
+
+    <!-- CALL LOG -->
+    <section id="tab-log" class="tab hidden">
+      <div class="card">
+        <h2>Call log</h2>
+        <div class="row">
+          <div><label>From</label><input type="date" id="lFrom"></div>
+          <div><label>To</label><input type="date" id="lTo"></div>
+          <div><label>Agent</label><select id="lAgent"></select></div>
+          <div><label>Direction</label><select id="lDir"><option value="">All</option><option value="IN">Inbound</option><option value="OUT">Outbound</option></select></div>
+          <div><label>Product</label><select id="lProd"><option value="">All</option><option value="ZAM818">ZAM818</option><option value="MEDIA">Media</option><option value="GENERAL">General</option></select></div>
+          <div><label>Station</label><select id="lStation"></select></div>
+          <div><label>Reason</label><select id="lCat"></select></div>
+          <div><label>Outcome</label><select id="lOutcome"></select></div>
+          <div><label>Phone</label><input id="lPhone"></div>
+          <div><label>Text in notes</label><input id="lText"></div>
+        </div>
+        <div class="row" style="margin-top:10px"><button class="btn" id="lGo" style="flex:0 0 auto">Search</button><button class="btn sec" id="lCsv" style="flex:0 0 auto">Download CSV</button><span id="lCount" class="muted" style="align-self:center"></span></div>
+      </div>
+      <div class="card"><div id="logBox"></div></div>
+    </section>
+
+    <!-- USERS (master) -->
+    <section id="tab-users" class="tab hidden">
+      <div class="grid2 split-b">
+        <div class="card"><h2>Users</h2><div id="usersBox"></div></div>
+        <div class="card">
+          <h2 id="uFormTitle">Add user</h2>
+          <div id="uErr" class="alert err hidden"></div>
+          <input type="hidden" id="uId">
+          <div class="field"><label>Name (as shown on login list)</label><input id="uName" maxlength="60"></div>
+          <div class="field"><label>Role</label><select id="uRole"><option value="agent">Call centre agent</option><option value="admin">Admin / manager</option><option value="master">Master admin</option></select></div>
+          <div class="field"><label>Department (admins receive this department's escalations)</label><select id="uDept"></select></div>
+          <div class="field" id="uPwWrap"><label>Starting password (user must change it)</label><input id="uPw" type="text" maxlength="60"></div>
+          <div class="field hidden" id="uActiveWrap"><label><input type="checkbox" id="uActive" style="width:auto"> Active (can log in)</label></div>
+          <div class="row"><button class="btn" id="uSave" style="flex:0 0 auto">Save</button><button class="btn sec" id="uNew" style="flex:0 0 auto">New</button></div>
+          <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+          <h3>Reset password</h3>
+          <div class="field"><label>User</label><select id="rpUser"></select></div>
+          <div class="field"><label>New temporary password</label><input id="rpPw" type="text"></div>
+          <button class="btn sec" id="rpBtn">Reset password</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETUP (master) -->
+    <section id="tab-setup" class="tab hidden">
+      <div class="card">
+        <h2>Call reasons</h2>
+        <p class="muted small" style="margin-top:0">Agents can only pick from this list. "Needs ref" forces a MoMo/transaction reference or amount. "Min note" is the minimum characters per note box. The department is the default escalation route.</p>
+        <div id="catBox"></div>
+        <div class="section-title">Add / edit reason</div>
+        <div id="cErr" class="alert err hidden"></div>
+        <input type="hidden" id="cId">
+        <div class="row">
+          <div><label>Direction</label><select id="cDir"><option value="IN">Inbound</option><option value="OUT">Outbound</option></select></div>
+          <div><label>Product</label><select id="cProd"><option value="BOTH">Both</option><option value="ZAM818">ZAM818</option><option value="MEDIA">Media</option></select></div>
+          <div style="flex-basis:260px"><label>Reason name</label><input id="cName" maxlength="80"></div>
+          <div><label>Escalates to</label><select id="cDept"></select></div>
+          <div style="flex:0 0 100px"><label>Min note</label><input id="cMin" type="number" min="15" value="20"></div>
+          <div style="flex:0 0 90px"><label>Sort</label><input id="cSort" type="number" value="100"></div>
+          <div style="flex:0 0 auto"><label><input type="checkbox" id="cRef" style="width:auto"> Needs ref</label><label><input type="checkbox" id="cActive" style="width:auto" checked> Active</label></div>
+        </div>
+        <div class="row" style="margin-top:8px"><button class="btn" id="cSave" style="flex:0 0 auto">Save reason</button><button class="btn sec" id="cNew" style="flex:0 0 auto">New</button></div>
+      </div>
+      <div class="card">
+        <h2>Stations</h2>
+        <div id="stBox"></div>
+        <div class="section-title">Add / edit station</div>
+        <div id="sErr" class="alert err hidden"></div>
+        <input type="hidden" id="sId">
+        <div class="row">
+          <div><label>Name</label><input id="sName"></div>
+          <div><label>Product</label><select id="sProd"><option value="MEDIA">Media</option><option value="ZAM818">ZAM818</option></select></div>
+          <div><label>USSD code</label><input id="sUssd" placeholder="*770*2#"></div>
+          <div style="flex:0 0 auto"><label><input type="checkbox" id="sActive" style="width:auto" checked> Active</label></div>
+          <div style="flex:0 0 auto"><button class="btn" id="sSave">Save station</button> <button class="btn sec" id="sNew">New</button></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="modal" class="modal hidden"><div class="box" id="modalBox"></div></div>
+<div id="toast"></div>
+
+<script>
+/* =====================================================================
+   CONFIG — paste your Supabase project URL and publishable (anon) key
+   ===================================================================== */
+const CONFIG = {
+  SUPABASE_URL: 'https://vjtirthgvxgjdgjaqxek.supabase.co',
+  SUPABASE_KEY: 'sb_publishable_8ZJp8xANRLLfEyg5CzT2rg_3JBXaCXp'
+};
+</script>
+<script>
+(function(){
+'use strict';
+/* ---------- test override (only works when opened from localhost) ---------- */
+const qs = new URLSearchParams(location.search);
+if (['localhost','127.0.0.1'].includes(location.hostname) && qs.get('api')) { CONFIG.SUPABASE_URL = qs.get('api'); }
+
+const TZ = 'Africa/Lusaka';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store = { get(k){ try{return localStorage.getItem(k)}catch(e){return null} }, set(k,v){ try{localStorage.setItem(k,v)}catch(e){} }, del(k){ try{localStorage.removeItem(k)}catch(e){} } };
+
+let S = { token: store.get('cc_token'), user: null, ref: null, dir: 'IN', outcome: null, product: null, startedAt: null, timerInt: null, histTimer: null };
+
+/* ---------- API ---------- */
+async function api(fn, args = {}) {
+  let res;
+  try {
+    res = await fetch(CONFIG.SUPABASE_URL.replace(/\/$/,'') + '/rest/v1/rpc/' + fn, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': CONFIG.SUPABASE_KEY },
+      body: JSON.stringify(args)
+    });
+  } catch (e) { throw new Error('Cannot reach the server. Check your internet connection.'); }
+  const txt = await res.text();
+  let body = null; try { body = txt ? JSON.parse(txt) : null; } catch (e) { body = txt; }
+  if (!res.ok) {
+    let msg = (body && body.message) || ('Server error ' + res.status);
+    if (/^AUTH:/.test(msg) && /expired/i.test(msg)) { logout(true); }
+    msg = msg.replace(/^(VALIDATION|AUTH):\s*/, '');
+    throw new Error(msg);
+  }
+  return body;
+}
+const T = () => S.token;
+
+/* ---------- formatting ---------- */
+const fmtDT = d => d ? new Date(d).toLocaleString('en-GB', { timeZone: TZ, day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+const fmtD = d => d ? new Date(d).toLocaleDateString('en-GB', { timeZone: TZ, day: '2-digit', month: 'short' }) : '';
+const localPhone = p => p ? '0' + String(p).slice(3) : '';
+const dur = s => s == null ? '' : (Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'));
+const todayISO = (offset = 0) => { const d = new Date(Date.now() - offset*864e5); return d.toLocaleDateString('en-CA', { timeZone: TZ }); };
+const ago = d => { const m = Math.round((Date.now() - new Date(d)) / 6e4); if (m < 60) return m + 'm'; const h = Math.round(m/60); return h < 48 ? h + 'h' : Math.round(h/24) + 'd'; };
+const OUT_LABEL = { RESOLVED:'Resolved', ESCALATED:'Escalate', FOLLOW_UP:'Call back later', DROPPED:'Dropped', SILENT:'Silent', PRANK:'Prank / abuse',
+  COMPLETED:'Completed', INTERESTED:'Interested', NOT_INTERESTED:'Not interested', NO_ANSWER:'No answer', SWITCHED_OFF:'Switched off / busy', WRONG_NUMBER:'Wrong number' };
+const FAILED = ['DROPPED','SILENT','NO_ANSWER','SWITCHED_OFF','WRONG_NUMBER'];
+const outBadge = o => { const cls = o==='ESCALATED'?'red':o==='FOLLOW_UP'?'amber':FAILED.includes(o)||o==='PRANK'?'':'green'; return `<span class="badge ${cls}">${esc(OUT_LABEL[o]||o)}</span>`; };
+const escBadge = s => s ? `<span class="badge ${s==='RESOLVED'?'green':s==='OPEN'?'red':'amber'}">${esc(s.replace('_',' '))}</span>` : '';
+const prioBadge = p => `<span class="badge ${p==='HIGH'?'red':p==='MEDIUM'?'amber':'blue'}">${esc(p)}</span>`;
+const deptName = c => (S.ref?.departments.find(d => d.code === c) || {}).name || c || '';
+
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display='none',2600); }
+function showErr(el, msg){ el.textContent = msg; el.classList.remove('hidden'); el.scrollIntoView({block:'nearest'}); }
+function hideErr(el){ el.classList.add('hidden'); }
+function opts(list, val, label, blank) { return (blank!==undefined?`<option value="">${esc(blank)}</option>`:'') + list.map(x => `<option value="${esc(x[val])}">${esc(x[label])}</option>`).join(''); }
+
+/* ---------- views ---------- */
+function show(view){ ['loginView','pwView','appView'].forEach(v => $(v).classList.toggle('hidden', v !== view)); }
+
+async function boot(){
+  if (S.token) {
+    try { S.user = await api('api_me', { p_token: T() }); } catch(e) { S.token = null; store.del('cc_token'); }
+  }
+  if (!S.token) return showLogin();
+  if (S.user.must_change_pw) return showPw(true);
+  enterApp();
+}
+
+async function showLogin(msg){
+  show('loginView'); hideErr($('loginErr'));
+  if (msg) showErr($('loginErr'), msg);
+  try {
+    const users = await api('api_login_users');
+    const last = store.get('cc_last_user');
+    $('loginUser').innerHTML = '<option value="">— select your name —</option>' + users.map(u => `<option ${u.name===last?'selected':''}>${esc(u.name)}</option>`).join('');
+  } catch(e) { showErr($('loginErr'), e.message); }
+  $('loginPw').value = '';
+}
+$('loginBtn').onclick = async () => {
+  hideErr($('loginErr'));
+  const name = $('loginUser').value, pw = $('loginPw').value;
+  if (!name || !pw) return showErr($('loginErr'), 'Select your name and enter your password.');
+  $('loginBtn').disabled = true;
+  try {
+    const r = await api('api_login', { p_name: name, p_password: pw });
+    if (r.error) { showErr($('loginErr'), r.error); return; }
+    S.token = r.token; S.user = r.user; store.set('cc_token', r.token); store.set('cc_last_user', name);
+    if (r.user.must_change_pw) showPw(true); else enterApp();
+  } catch(e) { showErr($('loginErr'), e.message); }
+  finally { $('loginBtn').disabled = false; }
+};
+$('loginPw').addEventListener('keydown', e => { if (e.key === 'Enter') $('loginBtn').click(); });
+
+function showPw(forced){
+  show('pwView'); hideErr($('pwErr'));
+  ['pwOld','pwNew','pwNew2'].forEach(i => $(i).value='');
+  $('pwWhy').textContent = forced ? 'Please replace the starting password before you continue.' : 'Change your password.';
+  $('pwCancel').classList.toggle('hidden', !!forced);
+}
+$('pwBtn').onclick = async () => {
+  hideErr($('pwErr'));
+  if ($('pwNew').value !== $('pwNew2').value) return showErr($('pwErr'), 'New passwords do not match.');
+  try {
+    await api('api_change_password', { p_token: T(), p_old: $('pwOld').value, p_new: $('pwNew').value });
+    S.user.must_change_pw = false; toast('Password changed'); enterApp();
+  } catch(e) { showErr($('pwErr'), e.message); }
+};
+$('pwCancel').onclick = () => enterApp();
+$('myPwBtn').onclick = () => showPw(false);
+$('logoutBtn').onclick = () => logout(false);
+async function logout(expired){
+  if (!expired && S.token) { try { await api('api_logout', { p_token: T() }); } catch(e){} }
+  S.token = null; S.user = null; store.del('cc_token');
+  showLogin(expired ? 'Your session expired — please sign in again.' : null);
+}
+
+/* ---------- app shell ---------- */
+const TABS = [
+  { id:'call', label:'New call', roles:['agent','admin','master'] },
+  { id:'mycalls', label:'My calls', roles:['agent','admin','master'] },
+  { id:'followups', label:'Call-backs', roles:['agent','admin','master'], count:'fu' },
+  { id:'esc', label:'Escalations', roles:['agent','admin','master'], count:'esc' },
+  { id:'dash', label:'Dashboard', roles:['admin','master'] },
+  { id:'log', label:'Call log', roles:['admin','master'] },
+  { id:'users', label:'Users', roles:['master'] },
+  { id:'setup', label:'Setup', roles:['master'] },
+];
+async function enterApp(){
+  show('appView');
+  $('whoName').innerHTML = `<b>${esc(S.user.name)}</b> · ${esc(S.user.role === 'master' ? 'Master admin' : S.user.role === 'admin' ? 'Admin — ' + (S.user.dept || '') : 'Agent')}`;
+  try { S.ref = await api('api_bootstrap', { p_token: T() }); } catch(e) { return; }
+  const tabs = TABS.filter(t => t.roles.includes(S.user.role));
+  $('nav').innerHTML = tabs.map(t => `<button data-tab="${t.id}">${t.label}${t.count?`<span class="count hidden" id="cnt-${t.count}"></span>`:''}</button>`).join('');
+  $('nav').querySelectorAll('button').forEach(b => b.onclick = () => openTab(b.dataset.tab));
+  fillStatic();
+  openTab(S.user.role === 'agent' ? 'call' : 'esc');
+  refreshCounts(); clearInterval(S.countInt); S.countInt = setInterval(refreshCounts, 60000);
+}
+function openTab(id){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('hidden', t.id !== 'tab-' + id));
+  $('nav').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === id));
+  ({ call: () => {}, mycalls: loadMyCalls, followups: loadFollowups, esc: loadEsc, dash: loadDash, log: loadLog, users: loadUsers, setup: loadSetup })[id]();
+}
+async function refreshCounts(){
+  if (!S.token) return;
+  try {
+    const [fu, es] = await Promise.all([api('api_my_followups', { p_token: T() }), api('api_escalations', { p_token: T(), p_status: 'ACTIVE' })]);
+    const mine = fu.filter(c => c.agent === S.user.name && new Date(c.followup_due) <= new Date(Date.now() + 36e5)).length;
+    const escN = S.user.role === 'agent' ? 0 : es.filter(e => e.status === 'OPEN' || e.overdue).length;
+    const set = (id, n) => { const el = $(id); if (!el) return; el.textContent = n; el.classList.toggle('hidden', !n); };
+    set('cnt-fu', mine); set('cnt-esc', escN);
+  } catch(e){}
+}
+function fillStatic(){
+  const R = S.ref;
+  $('fEscDept').innerHTML = opts(R.departments, 'code', 'name', '— choose —');
+  $('escDept').innerHTML = opts(R.departments, 'code', 'name', 'All my departments');
+  $('uDept').innerHTML = opts(R.departments, 'code', 'name', '— none —');
+  $('cDept').innerHTML = opts(R.departments, 'code', 'name', '— no escalation default —');
+  $('lAgent').innerHTML = opts(R.users, 'id', 'name', 'All');
+  $('lStation').innerHTML = opts(R.stations, 'id', 'name', 'All');
+  $('lCat').innerHTML = '<option value="">All</option>' + R.categories.map(c => `<option value="${c.id}">${c.direction==='IN'?'⬇':'⬆'} ${esc(c.name)}${c.product!=='BOTH'?' ('+c.product+')':''}</option>`).join('');
+  $('lOutcome').innerHTML = '<option value="">All</option>' + [...new Set([...R.outcomes_in, ...R.outcomes_out])].map(o => `<option value="${o}">${esc(OUT_LABEL[o]||o)}</option>`).join('');
+  resetCall();
+}
+
+/* =====================================================================
+   NEW CALL
+   ===================================================================== */
+$('dirSeg').querySelectorAll('button').forEach(b => b.onclick = () => { S.dir = b.dataset.dir; setDir(); });
+function setDir(){
+  $('dirSeg').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.dir === S.dir));
+  const inb = S.dir === 'IN';
+  $('lblType').textContent = inb ? 'Who is calling' : 'Who are you calling';
+  $('lblReason').textContent = inb ? 'Reason for call' : 'Purpose of call';
+  $('lblIssue').innerHTML = (inb ? 'What did the caller ask or report?' : 'Why you called & what the customer said') + ' <span class="req">*</span>';
+  $('lblAction').innerHTML = (inb ? 'What did you tell them / do?' : 'What you told them / agreed next step') + ' <span class="req">*</span>';
+  S.outcome = null;
+  const list = inb ? S.ref.outcomes_in : S.ref.outcomes_out;
+  $('outcomePills').innerHTML = list.map(o => `<button class="pill ${FAILED.includes(o)||o==='PRANK'?'fail':''} ${o==='ESCALATED'?'esc':''} ${o==='FOLLOW_UP'?'fu':''}" data-o="${o}">${esc(OUT_LABEL[o]||o)}</button>`).join('');
+  $('outcomePills').querySelectorAll('.pill').forEach(p => p.onclick = () => { S.outcome = p.dataset.o; syncForm(); });
+  fillCats(); syncForm();
+}
+$('productPills').querySelectorAll('.pill').forEach(p => p.onclick = () => { S.product = p.dataset.p; fillStations(); fillCats(); syncForm(); });
+function fillStations(){
+  const list = S.ref.stations.filter(s => s.active && (S.product === 'GENERAL' || s.product === S.product));
+  const prev = $('fStation').value;
+  $('fStation').innerHTML = (list.length === 1 && S.product === 'ZAM818') ? opts(list, 'id', 'name') : opts(list, 'id', 'name', S.product === 'GENERAL' ? '— none —' : '— choose station —');
+  if (list.some(s => String(s.id) === prev)) $('fStation').value = prev;
+}
+function fillCats(){
+  const prev = $('fCat').value;
+  const list = S.ref.categories.filter(c => c.active && c.direction === S.dir && (c.product === 'BOTH' || !S.product || S.product === 'GENERAL' || c.product === S.product));
+  const groups = {};
+  list.forEach(c => { const g = c.product === 'BOTH' ? (S.dir === 'IN' ? 'Money, complaints & other' : 'Outbound purposes') : (c.product === 'ZAM818' ? 'ZAM818' : 'Media games'); (groups[g] = groups[g] || []).push(c); });
+  $('fCat').innerHTML = '<option value="">— choose —</option>' + Object.entries(groups).map(([g, cs]) => `<optgroup label="${esc(g)}">${cs.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</optgroup>`).join('');
+  if (list.some(c => String(c.id) === prev)) $('fCat').value = prev;
+}
+const curCat = () => S.ref.categories.find(c => String(c.id) === $('fCat').value);
+$('fCat').onchange = () => { const c = curCat(); if (c && c.dept_code && !$('fEscDept').value) $('fEscDept').value = c.dept_code; syncForm(); };
+function minNote(){ const c = curCat(); return Math.max(c ? c.min_note : 20, 15); }
+function syncForm(){
+  $('outcomePills').querySelectorAll('.pill').forEach(p => p.classList.toggle('on', p.dataset.o === S.outcome));
+  $('productPills').querySelectorAll('.pill').forEach(p => p.classList.toggle('on', p.dataset.p === S.product));
+  const failed = FAILED.includes(S.outcome);
+  $('notesBlock').classList.toggle('hidden', failed);
+  $('failBlock').classList.toggle('hidden', !failed);
+  $('stationWrap').classList.toggle('hidden', !S.product);
+  $('escBlock').classList.toggle('hidden', S.outcome !== 'ESCALATED');
+  $('fuBlock').classList.toggle('hidden', S.outcome !== 'FOLLOW_UP');
+  const c = curCat();
+  $('refWrap').classList.toggle('hidden', !(c && c.needs_ref) || failed);
+  if (S.outcome === 'ESCALATED' && c && c.dept_code && !$('fEscDept').value) $('fEscDept').value = c.dept_code;
+  noteCounts();
+}
+function noteCounts(){
+  const m = S.outcome === 'PRANK' ? 10 : minNote();
+  [['fIssue','issueCount','issueHelp'],['fAction','actionCount','actionHelp']].forEach(([f,cnt,help]) => {
+    const n = $(f).value.trim().length;
+    $(cnt).innerHTML = `<span class="${n>=m?'good':'bad'}">${n} / ${m} min</span>`;
+    $(help).textContent = 'Specific facts: dates, amounts, station, ticket/ref, what you checked.';
+  });
+  $('lblAction').parentElement.classList.toggle('hidden', S.outcome === 'PRANK');
+  const e = $('fEscReason').value.trim().length; $('escCount').innerHTML = `<span class="${e>=25?'good':'bad'}">${e} / 25</span>`;
+}
+['fIssue','fAction','fEscReason'].forEach(i => $(i).addEventListener('input', noteCounts));
+
+/* timer */
+function startTimer(){ if (S.startedAt) return; S.startedAt = new Date(); $('timerBtn').textContent = 'Restart'; tick(); S.timerInt = setInterval(tick, 1000); }
+function tick(){ if (!S.startedAt) { $('timer').textContent = '00:00'; return; } const s = Math.floor((Date.now() - S.startedAt) / 1000); $('timer').textContent = String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); }
+$('timerBtn').onclick = () => { clearInterval(S.timerInt); S.startedAt = null; startTimer(); };
+
+/* phone + history */
+$('fPhone').addEventListener('input', () => {
+  startTimer();
+  const d = $('fPhone').value.replace(/\D/g, '');
+  let core = d.length === 12 && d.startsWith('260') ? d.slice(3) : d.length === 10 && d.startsWith('0') ? d.slice(1) : d.length === 9 ? d : null;
+  const ok = core && /^[579]/.test(core);
+  const op = !ok ? '' : ({ '97':'Airtel','77':'Airtel','57':'Airtel','96':'MTN','76':'MTN','56':'MTN','95':'Zamtel','75':'Zamtel','55':'Zamtel' })[core.slice(0,2)] || 'Other network';
+  $('phoneHint').innerHTML = !d ? '' : ok ? `<span class="good">✓ ${op}</span>` : `<span class="bad">Enter 10 digits starting 09/07/05</span>`;
+  clearTimeout(S.histTimer);
+  if (ok) S.histTimer = setTimeout(() => loadHistory('0' + core), 350); else $('histBox').innerHTML = '<span class="muted">Type a phone number to see this caller\'s previous calls and open issues.</span>';
+});
+['fType','fName','fIssue'].forEach(i => $(i).addEventListener('input', startTimer));
+async function loadHistory(ph){
+  try {
+    const h = await api('api_caller_history', { p_token: T(), p_phone: ph });
+    if (!h.phone) return;
+    let html = `<div class="row" style="margin-bottom:10px"><div><b>${esc(localPhone(h.phone))}</b> · ${esc(h.operator)}</div>
+      <div class="right">${h.total_calls} previous call${h.total_calls==1?'':'s'} ${h.open_escalations?`· <span class="badge red">${h.open_escalations} open escalation</span>`:''}</div></div>`;
+    if (!h.calls.length) html += '<div class="muted">New caller — no previous calls.</div>';
+    html += h.calls.map(c => `<div class="hitem ${c.escalation_id?'esc':''} ${c.outcome==='FOLLOW_UP'&&!c.followup_done_at?'fu':''}">
+      <div class="small muted">${fmtDT(c.created_at)} · ${esc(c.agent)} · ${c.direction==='IN'?'⬇ in':'⬆ out'} ${c.station?'· '+esc(c.station):''}</div>
+      <div><b>${esc(c.category || '—')}</b> ${outBadge(c.outcome)} ${c.escalation_id?'#'+c.escalation_id+' '+escBadge(c.escalation_status):''}</div>
+      ${c.issue_note?`<div class="small">${esc(c.issue_note)}</div>`:''}${c.action_note?`<div class="small muted">→ ${esc(c.action_note)}</div>`:''}
+      ${c.ref_no?`<div class="small">Ref: ${esc(c.ref_no)}</div>`:''}</div>`).join('');
+    $('histBox').innerHTML = html;
+  } catch(e) { $('histBox').textContent = e.message; }
+}
+
+function resetCall(){
+  S.outcome = null; S.product = null; S.startedAt = null; clearInterval(S.timerInt); tick(); $('timerBtn').textContent = 'Start';
+  ['fPhone','fName','fIssue','fAction','fRef','fAmt','fFailNote','fEscReason','fFuDue'].forEach(i => $(i).value = '');
+  ['fType','fEscDept','fEscPrio'].forEach(i => $(i).value = '');
+  $('phoneHint').innerHTML = ''; $('histBox').innerHTML = '<span class="muted">Type a phone number to see this caller\'s previous calls and open issues.</span>';
+  hideErr($('callErr')); fillStations(); setDir();
+}
+$('clearCallBtn').onclick = () => { if (confirmClear()) resetCall(); };
+function confirmClear(){ return !$('fIssue').value && !$('fAction').value ? true : window.confirm('Clear this call without saving?'); }
+
+$('saveCallBtn').onclick = async () => {
+  hideErr($('callErr'));
+  const failed = FAILED.includes(S.outcome);
+  const p = {
+    direction: S.dir, phone: $('fPhone').value, caller_type: $('fType').value, caller_name: $('fName').value,
+    outcome: S.outcome || '', product: S.product, station_id: $('fStation').value || null,
+    category_id: $('fCat').value || null,
+    issue_note: failed ? $('fFailNote').value : $('fIssue').value, action_note: failed || S.outcome === 'PRANK' ? null : $('fAction').value,
+    ref_no: $('fRef').value, amount: $('fAmt').value || null,
+    started_at: S.startedAt ? S.startedAt.toISOString() : null
+  };
+  if (S.outcome === 'ESCALATED') Object.assign(p, { esc_dept: $('fEscDept').value, esc_priority: $('fEscPrio').value, esc_reason: $('fEscReason').value });
+  if (S.outcome === 'FOLLOW_UP' && $('fFuDue').value) p.followup_due = new Date($('fFuDue').value).toISOString();
+  // quick client checks (server re-checks everything)
+  if (!p.outcome) return showErr($('callErr'), 'Choose the call result.');
+  $('saveCallBtn').disabled = true;
+  try {
+    const r = await api('api_log_call', { p_token: T(), p });
+    toast(r.escalation_id ? `Saved — escalation #${r.escalation_id} sent to ${deptName(p.esc_dept || (curCat()||{}).dept_code)}` : 'Call saved');
+    resetCall(); refreshCounts();
+  } catch(e) { showErr($('callErr'), e.message); }
+  finally { $('saveCallBtn').disabled = false; }
+};
+
+/* =====================================================================
+   MY CALLS / FOLLOW-UPS
+   ===================================================================== */
+function callsTable(list, opts2 = {}){
+  if (!list.length) return '<div class="muted">No calls.</div>';
+  return `<div class="tablewrap"><table><thead><tr><th>Time</th>${opts2.agent?'<th>Agent</th>':''}<th></th><th>Phone</th><th>Product / station</th><th>Reason</th><th>Result</th><th>Notes</th><th>Dur.</th></tr></thead><tbody>` +
+    list.map(c => `<tr ${c.escalation_id?`class="click" data-esc="${c.escalation_id}"`:''}><td class="nowrap">${fmtDT(c.created_at)}</td>${opts2.agent?`<td>${esc(c.agent)}</td>`:''}
+      <td>${c.direction==='IN'?'⬇':'⬆'}</td><td class="nowrap">${esc(localPhone(c.phone))}<div class="small muted">${esc(c.operator)}</div></td>
+      <td>${esc(c.product||'')}<div class="small muted">${esc(c.station||'')}</div></td><td>${esc(c.category||'—')}</td>
+      <td>${outBadge(c.outcome)}${c.escalation_id?`<div class="small">#${c.escalation_id} ${escBadge(c.escalation_status)}</div>`:''}</td>
+      <td class="note small">${esc(c.issue_note||'')}${c.action_note?`<div class="muted">→ ${esc(c.action_note)}</div>`:''}${c.ref_no?`<div>Ref: ${esc(c.ref_no)}${c.amount?' · K'+esc(c.amount):''}</div>`:''}</td>
+      <td>${dur(c.duration_sec)}</td></tr>`).join('') + '</tbody></table></div>';
+}
+function bindEscRows(box){ box.querySelectorAll('tr[data-esc]').forEach(tr => tr.onclick = () => openEsc(tr.dataset.esc)); }
+$('myDays').onchange = loadMyCalls;
+async function loadMyCalls(){
+  const list = await api('api_my_calls', { p_token: T(), p_days: +$('myDays').value });
+  const n = list.length, inb = list.filter(c => c.direction==='IN').length;
+  $('myCallsBox').innerHTML = `<p class="muted">${n} calls · ${inb} inbound · ${n-inb} outbound · ${list.filter(c=>c.outcome==='ESCALATED').length} escalated</p>` + callsTable(list);
+  bindEscRows($('myCallsBox'));
+}
+async function loadFollowups(){
+  const list = await api('api_my_followups', { p_token: T() });
+  if (!list.length) { $('fuBox').innerHTML = '<div class="muted">No call-backs pending. 👍</div>'; return; }
+  $('fuBox').innerHTML = `<div class="tablewrap"><table><thead><tr><th>Due</th><th>Agent</th><th>Phone</th><th>Reason</th><th>Notes</th><th style="width:320px">Close call-back</th></tr></thead><tbody>` +
+    list.map(c => { const late = new Date(c.followup_due) < new Date(); return `<tr><td class="nowrap">${fmtDT(c.followup_due)} ${late?'<span class="badge red">late</span>':''}</td><td>${esc(c.agent)}</td>
+      <td class="nowrap">${esc(localPhone(c.phone))}</td><td>${esc(c.category||'')}</td><td class="note small">${esc(c.issue_note||'')}<div class="muted">→ ${esc(c.action_note||'')}</div></td>
+      <td><textarea id="fu-${c.id}" placeholder="Result of the call-back (min 20 chars)" style="min-height:50px"></textarea><button class="btn sm" data-fu="${c.id}" style="margin-top:4px">Mark done</button> <span class="small" id="fuerr-${c.id}" style="color:var(--red)"></span></td></tr>`; }).join('') + '</tbody></table></div>';
+  $('fuBox').querySelectorAll('button[data-fu]').forEach(b => b.onclick = async () => {
+    const id = b.dataset.fu;
+    try { await api('api_followup_done', { p_token: T(), p_call_id: +id, p_note: $('fu-' + id).value }); toast('Call-back closed'); loadFollowups(); refreshCounts(); }
+    catch(e) { $('fuerr-' + id).textContent = e.message; }
+  });
+}
+
+/* =====================================================================
+   ESCALATIONS
+   ===================================================================== */
+$('escStatus').onchange = loadEsc; $('escDept').onchange = loadEsc;
+async function loadEsc(){
+  const isAgent = S.user.role === 'agent';
+  $('escTitle').textContent = isAgent ? 'Escalations I raised' : S.user.role === 'master' || S.user.dept === 'MGMT' ? 'Escalations — all departments' : 'Escalations — ' + deptName(S.user.dept);
+  $('escDeptWrap').classList.toggle('hidden', isAgent || (S.user.role === 'admin' && S.user.dept !== 'MGMT'));
+  const list = await api('api_escalations', { p_token: T(), p_status: $('escStatus').value, p_dept: $('escDept').value || null });
+  if (!list.length) { $('escBox').innerHTML = '<div class="muted">Nothing here.</div>'; return; }
+  $('escBox').innerHTML = `<div class="tablewrap"><table><thead><tr><th>#</th><th>Priority</th><th>Status</th><th>Dept</th><th>Raised</th><th>Due</th><th>Caller</th><th>Issue</th><th>Owner</th></tr></thead><tbody>` +
+    list.map(e => `<tr class="click" data-esc="${e.id}"><td><b>${e.id}</b></td><td>${prioBadge(e.priority)}</td><td>${escBadge(e.status)}</td><td>${esc(e.dept)}</td>
+      <td class="nowrap">${fmtDT(e.created_at)}<div class="small muted">by ${esc(e.created_by)} · ${ago(e.created_at)} ago</div></td>
+      <td class="nowrap">${e.status==='RESOLVED'?`<span class="small">done ${fmtDT(e.resolved_at)}</span>`:e.overdue?`<span class="badge red">OVERDUE ${ago(e.due_at)}</span>`:fmtDT(e.due_at)}</td>
+      <td class="nowrap">${esc(localPhone(e.call.phone))}<div class="small muted">${esc(e.call.station||e.call.product||'')}</div></td>
+      <td class="note small"><b>${esc(e.call.category||'')}</b><div>${esc(e.reason)}</div></td><td>${esc(e.assigned_to||'—')}</td></tr>`).join('') + '</tbody></table></div>';
+  bindEscRows($('escBox'));
+}
+async function openEsc(id){
+  let e; try { e = await api('api_escalation_detail', { p_token: T(), p_id: +id }); } catch(err) { return toast(err.message); }
+  const c = e.call, isAgent = S.user.role === 'agent', done = e.status === 'RESOLVED';
+  $('modalBox').innerHTML = `
+    <div class="row" style="align-items:center"><h2 style="flex:1 1 auto">Escalation #${e.id}</h2><div style="flex:0 0 auto">${prioBadge(e.priority)} ${escBadge(e.status)} ${e.overdue?'<span class="badge red">OVERDUE</span>':''}</div><button class="btn sec sm" style="flex:0 0 auto" id="mClose">Close ✕</button></div>
+    <div class="grid2">
+      <div><div class="kv">
+        <div>Department</div><div>${esc(deptName(e.dept))}</div>
+        <div>Raised</div><div>${fmtDT(e.created_at)} by ${esc(c.agent)}</div>
+        <div>Due</div><div>${fmtDT(e.due_at)}</div>
+        <div>Owner</div><div>${esc(e.assigned_to||'— not taken —')}</div>
+        <div>Caller</div><div>${esc(localPhone(c.phone))} (${esc(c.operator)}) ${c.caller_name?'· '+esc(c.caller_name):''} · ${esc(c.caller_type)}</div>
+        <div>Product</div><div>${esc(c.product||'')} ${c.station?'· '+esc(c.station):''}</div>
+        <div>Reason</div><div>${esc(c.category||'')}</div>
+        ${c.ref_no||c.amount?`<div>Ref / amount</div><div>${esc(c.ref_no||'')} ${c.amount?'· K'+esc(c.amount):''}</div>`:''}
+        <div>Other calls</div><div>${e.other_calls_from_number} from this number</div>
+      </div>
+      <div class="section-title">Caller said</div><div class="note">${esc(c.issue_note)}</div>
+      <div class="section-title">Agent did</div><div class="note">${esc(c.action_note)}</div>
+      ${e.resolution?`<div class="section-title">Resolution</div><div class="note">${esc(e.resolution)}</div><div class="small muted">Customer informed: ${e.customer_informed?'Yes':'No'}${e.resolved_by?' · by '+esc(e.resolved_by):''}</div>`:''}
+      </div>
+      <div><div class="section-title">History</div><div class="log">${e.history.map(h => `<div><div class="small muted">${fmtDT(h.at)} · ${esc(h.user)} · <b>${esc(h.action)}</b></div>${h.note?`<div class="note">${esc(h.note)}</div>`:''}</div>`).join('')}</div></div>
+    </div>
+    <div id="mErr" class="alert err hidden" style="margin-top:12px"></div>
+    <div class="section-title">Action</div>
+    <div class="field"><textarea id="mNote" placeholder="${isAgent?'Add a comment (e.g. customer called again)':'Comment / resolution — what was done, refs, amounts'}"></textarea></div>
+    <div class="row" style="align-items:flex-end">
+      ${isAgent ? `<button class="btn" data-a="COMMENT" style="flex:0 0 auto">Add comment</button>` : `
+        ${!done && e.status==='OPEN' ? `<button class="btn" data-a="TAKE" style="flex:0 0 auto">Take ownership</button>` : ''}
+        <button class="btn sec" data-a="COMMENT" style="flex:0 0 auto">Add comment</button>
+        ${!done ? `<div style="flex:0 0 auto"><label>Customer informed?</label><select id="mInformed"><option value="">—</option><option value="true">Yes</option><option value="false">No</option></select></div><button class="btn" data-a="RESOLVE" style="flex:0 0 auto">Mark resolved</button>` : `<button class="btn red" data-a="REOPEN" style="flex:0 0 auto">Reopen</button>`}
+        <div style="flex:0 0 180px"><label>Transfer to</label><select id="mDept">${opts(S.ref.departments.filter(d=>d.code!==e.dept),'code','name','— department —')}</select></div><button class="btn sec" data-a="TRANSFER" style="flex:0 0 auto">Transfer</button>
+        <div style="flex:0 0 130px"><label>Priority</label><select id="mPrio">${['HIGH','MEDIUM','LOW'].map(p=>`<option ${p===e.priority?'selected':''}>${p}</option>`).join('')}</select></div><button class="btn sec" data-a="PRIORITY" style="flex:0 0 auto">Set</button>`}
+    </div>`;
+  $('modal').classList.remove('hidden');
+  $('mClose').onclick = closeModal;
+  $('modalBox').querySelectorAll('button[data-a]').forEach(b => b.onclick = async () => {
+    const a = b.dataset.a, p = { action: a, note: $('mNote').value };
+    if (a === 'RESOLVE') p.customer_informed = $('mInformed').value === '' ? null : $('mInformed').value === 'true';
+    if (a === 'TRANSFER') p.dept = $('mDept').value;
+    if (a === 'PRIORITY') p.priority = $('mPrio').value;
+    try {
+      const r = await api('api_escalation_action', { p_token: T(), p_id: e.id, p });
+      toast(a === 'TRANSFER' ? 'Transferred to ' + deptName(p.dept) : 'Saved');
+      if (r.status === 'TRANSFERRED') closeModal(); else openEsc(e.id);
+      if (!$('tab-esc').classList.contains('hidden')) loadEsc(); refreshCounts();
+    } catch(err) { showErr($('mErr'), err.message); }
+  });
+}
+function closeModal(){ $('modal').classList.add('hidden'); }
+$('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* =====================================================================
+   DASHBOARD
+   ===================================================================== */
+document.querySelectorAll('[data-range]').forEach(b => b.onclick = () => { $('dFrom').value = todayISO(+b.dataset.range); $('dTo').value = todayISO(0); loadDash(); });
+$('dFrom').onchange = loadDash; $('dTo').onchange = loadDash;
+function barChart(rows, keys, colors, labelFn, h = 160){
+  if (!rows.length) return '<div class="muted small">No data</div>';
+  const W = Math.max(rows.length * 34, 420), max = Math.max(1, ...rows.map(r => keys.reduce((s,k) => s + (r[k]||0), 0)));
+  const bw = Math.min(W / rows.length, 60), x0 = (W - bw*rows.length)/2;
+  let svg = `<svg viewBox="0 0 ${W} ${h+22}" width="100%" style="max-height:${h+60}px" role="img">`;
+  rows.forEach((r, i) => {
+    let y = h;
+    keys.forEach((k, j) => { const v = r[k]||0, bh = v / max * (h-14); y -= bh; if (v) svg += `<rect x="${x0+i*bw+3}" y="${y}" width="${bw-6}" height="${bh}" fill="${colors[j]}" rx="2"><title>${esc(labelFn(r))}: ${k} ${v}</title></rect>`; });
+    const tot = keys.reduce((s,k)=>s+(r[k]||0),0);
+    if (tot) svg += `<text x="${x0+i*bw+bw/2}" y="${y-3}" text-anchor="middle">${tot}</text>`;
+    if (rows.length <= 31) svg += `<text x="${x0+i*bw+bw/2}" y="${h+14}" text-anchor="middle">${esc(labelFn(r))}</text>`;
+  });
+  return svg + '</svg>';
+}
+function hbar(v, max){ return `<div class="barbg"><div class="bar" style="width:${max?Math.round(v/max*100):0}%"></div></div>`; }
+const pct = v => v == null ? '—' : v + '%';
+async function loadDash(){
+  if (!$('dFrom').value) { $('dFrom').value = todayISO(6); $('dTo').value = todayISO(0); }
+  $('dashBox').innerHTML = '<div class="card muted">Loading…</div>';
+  let s; try { s = await api('api_stats', { p_token: T(), p_from: $('dFrom').value, p_to: $('dTo').value }); } catch(e) { $('dashBox').innerHTML = `<div class="alert err">${esc(e.message)}</div>`; return; }
+  const t = s.totals, E = s.escalations;
+  const kpi = (v, l, warn) => `<div class="kpi ${warn?'warn':''}"><div class="v">${v ?? 0}</div><div class="l">${l}</div></div>`;
+  const talked = t.calls - t.failed;
+  let html = `<div class="kpis">
+    ${kpi(t.calls,'Total calls')}${kpi(t.inbound,'Inbound')}${kpi(t.outbound,'Outbound')}${kpi(t.unique_numbers,'Unique numbers')}
+    ${kpi(talked ? Math.round(t.resolved/talked*100)+'%' : '—','Resolved on the call')}${kpi(t.escalated,'Escalated')}
+    ${kpi(pct(t.repeat_rate),'Called back within 7 days after "resolved"')}${kpi(dur(t.avg_duration_sec)||'—','Avg call duration')}
+    ${kpi(E.open_now,'Escalations open now', E.open_now>0)}${kpi(E.overdue_now,'Escalations overdue', E.overdue_now>0)}</div>`;
+  const maxA = Math.max(1, ...s.agents.map(a => a.calls));
+  html += `<div class="card"><h3>Agent performance</h3><div class="tablewrap"><table><thead><tr><th>Agent</th><th>Calls</th><th style="width:140px"></th><th>In</th><th>Out</th><th>Resolved %</th><th>Escalated</th><th>Esc. %</th><th>No-conversation</th><th>Repeat within 7d</th><th>Avg dur.</th><th>Avg note chars</th><th>Call-backs open / late</th><th>Days active</th></tr></thead><tbody>` +
+    (s.agents.map(a => `<tr><td><b>${esc(a.agent)}</b></td><td>${a.calls}</td><td>${hbar(a.calls,maxA)}</td><td>${a.inbound}</td><td>${a.outbound}</td><td>${pct(a.resolved_pct)}</td><td>${a.escalated}</td><td>${pct(a.escalation_pct)}</td><td>${a.failed}</td><td>${pct(a.repeat_rate)}</td><td>${dur(a.avg_duration_sec)}</td><td>${a.avg_note_chars ?? '—'}</td><td>${a.followups_open} / <span style="color:${a.followups_overdue?'var(--red)':'inherit'}">${a.followups_overdue}</span></td><td>${a.active_days}</td></tr>`).join('') || '<tr><td colspan="14" class="muted">No calls in this period</td></tr>') +
+    `</tbody></table></div><p class="small muted">Repeat within 7d = share of calls marked "Resolved" where the same number called in again within 7 days — a high figure suggests the issue was not really resolved. Avg note chars = combined length of both note boxes.</p></div>`;
+  html += `<div class="grid2"><div class="card"><h3>Calls per day <span class="small muted">(<span style="color:#0e7a4d">■</span> in <span style="color:#1f5fa8">■</span> out)</span></h3>${barChart(s.daily, ['inbound','outbound'], ['#0e7a4d','#1f5fa8'], r => fmtD(r.day + 'T12:00:00'))}</div>
+    <div class="card"><h3>Calls by hour of day</h3>${barChart(Array.from({length:24},(_,h)=>({hour:h,calls:(s.hourly.find(x=>x.hour===h)||{}).calls||0})).filter(r=>r.hour>=5&&r.hour<=22), ['calls'], ['#0e7a4d'], r => String(r.hour).padStart(2,'0'))}</div></div>`;
+  const maxC = Math.max(1, ...s.categories.map(c => c.calls));
+  html += `<div class="grid2"><div class="card"><h3>Reasons for calls</h3><div class="tablewrap" style="max-height:420px"><table><thead><tr><th>Reason</th><th></th><th>Product</th><th>Calls</th><th style="width:120px"></th><th>Escalated</th></tr></thead><tbody>` +
+    s.categories.map(c => `<tr><td>${esc(c.category)}</td><td>${c.direction==='IN'?'⬇':'⬆'}</td><td>${esc(c.product||'')}</td><td>${c.calls}</td><td>${hbar(c.calls,maxC)}</td><td>${c.escalated||''}</td></tr>`).join('') + `</tbody></table></div></div>
+    <div class="card"><h3>By product / station</h3><div class="tablewrap" style="max-height:420px"><table><thead><tr><th>Product</th><th>Station</th><th>Calls</th></tr></thead><tbody>` +
+    s.products.map(p => `<tr><td>${esc(p.product)}</td><td>${esc(p.station)}</td><td>${p.calls}</td></tr>`).join('') + `</tbody></table></div></div></div>`;
+  html += `<div class="card"><h3>Escalations by department</h3><div class="tablewrap"><table><thead><tr><th>Department</th><th>Raised (period)</th><th>Resolved (period)</th><th>Open now</th><th>Overdue now</th><th>Avg hours to resolve</th><th>Resolved within SLA</th></tr></thead><tbody>` +
+    E.by_dept.map(d => `<tr><td><b>${esc(d.dept)}</b></td><td>${d.raised}</td><td>${d.resolved}</td><td>${d.open}</td><td>${d.overdue?`<span class="badge red">${d.overdue}</span>`:0}</td><td>${d.avg_hours_to_resolve ?? '—'}</td><td>${pct(d.within_sla_pct)}</td></tr>`).join('') +
+    `</tbody></table></div><p class="small muted">SLA: High 4 hrs · Medium 24 hrs · Low 3 days.</p></div>`;
+  html += `<div class="grid2"><div class="card"><h3>Frequent callers (3+ inbound calls)</h3>${s.top_numbers.length ? `<table><thead><tr><th>Phone</th><th>Calls</th><th>Last call</th></tr></thead><tbody>${s.top_numbers.map(n => `<tr class="click" data-phone="${esc(n.phone)}"><td>${esc(localPhone(n.phone))}</td><td>${n.calls}</td><td>${fmtDT(n.last)}</td></tr>`).join('')}</tbody></table><p class="small muted">Click a number to open its calls in the Call log.</p>` : '<div class="muted small">None</div>'}</div>
+    <div class="card"><h3>Note quality check — 10 shortest notes</h3>${s.shortest_notes.length ? `<table><thead><tr><th>Agent</th><th>When</th><th>Notes</th></tr></thead><tbody>${s.shortest_notes.map(c => `<tr><td>${esc(c.agent)}</td><td class="nowrap small">${fmtDT(c.created_at)}</td><td class="small">${esc(c.issue_note||'')}<div class="muted">→ ${esc(c.action_note||'')}</div></td></tr>`).join('')}</tbody></table>` : '<div class="muted small">None</div>'}</div></div>`;
+  $('dashBox').innerHTML = html;
+  $('dashBox').querySelectorAll('tr[data-phone]').forEach(tr => tr.onclick = () => { $('lPhone').value = localPhone(tr.dataset.phone); $('lFrom').value = todayISO(89); $('lTo').value = todayISO(0); openTab('log'); });
+}
+
+/* =====================================================================
+   CALL LOG
+   ===================================================================== */
+let lastLog = [];
+$('lGo').onclick = loadLog;
+async function loadLog(){
+  if (!$('lFrom').value) { $('lFrom').value = todayISO(6); $('lTo').value = todayISO(0); }
+  const p = { from: $('lFrom').value, to: $('lTo').value, agent_id: $('lAgent').value, direction: $('lDir').value, product: $('lProd').value,
+    station_id: $('lStation').value, category_id: $('lCat').value, outcome: $('lOutcome').value, phone: $('lPhone').value, text: $('lText').value };
+  try { lastLog = await api('api_calls_search', { p_token: T(), p }); } catch(e) { $('logBox').innerHTML = `<div class="alert err">${esc(e.message)}</div>`; return; }
+  $('lCount').textContent = lastLog.length + ' calls' + (lastLog.length >= 5000 ? ' (limit reached — narrow the dates)' : '');
+  $('logBox').innerHTML = callsTable(lastLog, { agent: true }); bindEscRows($('logBox'));
+}
+$('lCsv').onclick = () => {
+  if (!lastLog.length) return toast('Search first');
+  const cols = ['id','created_at','agent','direction','product','station','phone','operator','caller_type','caller_name','category','outcome','issue_note','action_note','ref_no','amount','duration_sec','followup_due','followup_done_at','followup_note','escalation_id','escalation_status'];
+  const q = v => { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; };
+  const rows = lastLog.map(c => cols.map(k => q(k === 'created_at' ? new Date(c[k]).toLocaleString('en-GB',{timeZone:TZ}) : k === 'phone' ? localPhone(c[k]) : c[k])).join(','));
+  const blob = new Blob(['﻿' + cols.join(',') + '\n' + rows.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `calls_${$('lFrom').value}_to_${$('lTo').value}.csv`; a.click();
+};
+
+/* =====================================================================
+   USERS (master)
+   ===================================================================== */
+async function loadUsers(){
+  const list = await api('api_users_admin', { p_token: T() });
+  $('usersBox').innerHTML = `<div class="tablewrap"><table><thead><tr><th>Name</th><th>Role</th><th>Department</th><th>Status</th><th>Last login</th><th></th></tr></thead><tbody>` +
+    list.map(u => `<tr><td><b>${esc(u.name)}</b></td><td>${esc(u.role)}</td><td>${esc(deptName(u.dept))}</td>
+      <td>${u.active?'<span class="badge green">active</span>':'<span class="badge">inactive</span>'} ${u.locked?'<span class="badge red">locked</span>':''} ${u.must_change_pw?'<span class="badge amber">temp pw</span>':''}</td>
+      <td class="small">${fmtDT(u.last_login)}</td><td><button class="btn sec sm" data-u='${esc(JSON.stringify(u))}'>Edit</button></td></tr>`).join('') + '</tbody></table></div>';
+  $('usersBox').querySelectorAll('button[data-u]').forEach(b => b.onclick = () => editUser(JSON.parse(b.dataset.u)));
+  $('rpUser').innerHTML = opts(list, 'id', 'name', '— choose user —');
+}
+function editUser(u){
+  hideErr($('uErr'));
+  $('uFormTitle').textContent = u ? 'Edit user' : 'Add user';
+  $('uId').value = u ? u.id : ''; $('uName').value = u ? u.name : ''; $('uRole').value = u ? u.role : 'agent'; $('uDept').value = u ? (u.dept||'') : '';
+  $('uActive').checked = u ? u.active : true; $('uPw').value = '';
+  $('uPwWrap').classList.toggle('hidden', !!u); $('uActiveWrap').classList.toggle('hidden', !u);
+}
+$('uNew').onclick = () => editUser(null);
+$('uSave').onclick = async () => {
+  hideErr($('uErr'));
+  const p = { id: $('uId').value || null, name: $('uName').value, role: $('uRole').value, dept: $('uDept').value || null, password: $('uPw').value, active: $('uActive').checked };
+  try { await api('api_user_save', { p_token: T(), p }); toast('User saved'); editUser(null); loadUsers(); S.ref = await api('api_bootstrap', { p_token: T() }); }
+  catch(e) { showErr($('uErr'), e.message); }
+};
+$('rpBtn').onclick = async () => {
+  hideErr($('uErr'));
+  if (!$('rpUser').value) return showErr($('uErr'), 'Choose a user to reset.');
+  try { await api('api_user_reset_password', { p_token: T(), p_user_id: +$('rpUser').value, p_password: $('rpPw').value }); toast('Password reset — user must change it at next login'); $('rpPw').value=''; loadUsers(); }
+  catch(e) { showErr($('uErr'), e.message); }
+};
+
+/* =====================================================================
+   SETUP (master)
+   ===================================================================== */
+async function loadSetup(){
+  S.ref = await api('api_bootstrap', { p_token: T() });
+  $('catBox').innerHTML = `<div class="tablewrap" style="max-height:420px"><table><thead><tr><th>Dir</th><th>Product</th><th>Reason</th><th>Escalates to</th><th>Needs ref</th><th>Min note</th><th>Sort</th><th>Active</th><th></th></tr></thead><tbody>` +
+    S.ref.categories.map(c => `<tr><td>${c.direction==='IN'?'⬇ In':'⬆ Out'}</td><td>${esc(c.product)}</td><td>${esc(c.name)}</td><td>${esc(deptName(c.dept_code))}</td><td>${c.needs_ref?'Yes':''}</td><td>${c.min_note}</td><td>${c.sort}</td><td>${c.active?'✓':'—'}</td><td><button class="btn sec sm" data-c='${esc(JSON.stringify(c))}'>Edit</button></td></tr>`).join('') + '</tbody></table></div>';
+  $('catBox').querySelectorAll('button[data-c]').forEach(b => b.onclick = () => editCat(JSON.parse(b.dataset.c)));
+  $('stBox').innerHTML = `<table><thead><tr><th>Name</th><th>Product</th><th>USSD</th><th>Active</th><th></th></tr></thead><tbody>` +
+    S.ref.stations.map(s => `<tr><td>${esc(s.name)}</td><td>${esc(s.product)}</td><td>${esc(s.ussd_code||'')}</td><td>${s.active?'✓':'—'}</td><td><button class="btn sec sm" data-s='${esc(JSON.stringify(s))}'>Edit</button></td></tr>`).join('') + '</tbody></table>';
+  $('stBox').querySelectorAll('button[data-s]').forEach(b => b.onclick = () => editSt(JSON.parse(b.dataset.s)));
+}
+function editCat(c){ hideErr($('cErr')); $('cId').value=c?c.id:''; $('cDir').value=c?c.direction:'IN'; $('cProd').value=c?c.product:'BOTH'; $('cName').value=c?c.name:''; $('cDept').value=c?(c.dept_code||''):''; $('cMin').value=c?c.min_note:20; $('cSort').value=c?c.sort:100; $('cRef').checked=c?c.needs_ref:false; $('cActive').checked=c?c.active:true; $('cName').focus(); }
+function editSt(s){ hideErr($('sErr')); $('sId').value=s?s.id:''; $('sName').value=s?s.name:''; $('sProd').value=s?s.product:'MEDIA'; $('sUssd').value=s?(s.ussd_code||''):''; $('sActive').checked=s?s.active:true; $('sName').focus(); }
+$('cNew').onclick = () => editCat(null); $('sNew').onclick = () => editSt(null);
+$('cSave').onclick = async () => {
+  hideErr($('cErr'));
+  const p = { id:$('cId').value||null, direction:$('cDir').value, product:$('cProd').value, name:$('cName').value, dept_code:$('cDept').value, min_note:$('cMin').value, sort:$('cSort').value, needs_ref:$('cRef').checked, active:$('cActive').checked };
+  try { await api('api_category_save', { p_token: T(), p }); toast('Reason saved'); editCat(null); await loadSetup(); fillStatic(); } catch(e) { showErr($('cErr'), e.message); }
+};
+$('sSave').onclick = async () => {
+  hideErr($('sErr'));
+  const p = { id:$('sId').value||null, name:$('sName').value, product:$('sProd').value, ussd_code:$('sUssd').value, active:$('sActive').checked };
+  try { await api('api_station_save', { p_token: T(), p }); toast('Station saved'); editSt(null); await loadSetup(); fillStatic(); } catch(e) { showErr($('sErr'), e.message); }
+};
+
+/* ---------- warn before leaving with an unsaved call ---------- */
+window.addEventListener('beforeunload', e => { if (S.token && ($('fIssue').value || $('fAction').value)) { e.preventDefault(); e.returnValue = ''; } });
+
+if (/YOUR-PROJECT-REF/.test(CONFIG.SUPABASE_URL) || /YOUR-PUBLISHABLE/.test(CONFIG.SUPABASE_KEY)) {
+  document.body.innerHTML = '<div class="login"><div class="card"><h2>Setup needed</h2><p>Open <b>index.html</b> in a text editor and paste your Supabase URL and key into the CONFIG section near the bottom.</p></div></div>';
+} else { boot(); }
+})();
+</script>
+</body>
+</html>
