@@ -22,9 +22,7 @@ h1,h2,h3{margin:0 0 8px;line-height:1.2} h2{font-size:18px} h3{font-size:15px}
 .row>*{flex:1 1 180px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .split-a{grid-template-columns:1.35fr 1fr}.split-b{grid-template-columns:1.6fr 1fr}
-@media(max-width:900px){.grid2,.split-a,.split-b{grid-template-columns:1fr}
-  header nav{flex:1 1 100%;order:3;flex-wrap:nowrap;overflow-x:auto} header nav button{white-space:nowrap}
-  main{padding:12px} .seg button{padding:9px 12px}}
+@media(max-width:900px){.grid2,.split-a,.split-b{grid-template-columns:1fr} main{padding:12px} .seg button{padding:9px 12px}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:16px}
 label{display:block;font-weight:600;font-size:13px;margin-bottom:4px}
 label .req{color:var(--red)}
@@ -96,6 +94,38 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
 .kv{display:grid;grid-template-columns:150px 1fr;gap:4px 12px;font-size:13px} .kv div:nth-child(odd){color:var(--muted);font-weight:600}
 .log{border-left:2px solid var(--line);padding-left:12px}
 .log div{margin-bottom:8px}
+/* ---------- phone tables: each row becomes a card ---------- */
+@media(max-width:700px){
+  .tablewrap{max-height:none;border:0;overflow:visible}
+  .tablewrap table,.tablewrap tbody{display:block}
+  .tablewrap thead{display:none}
+  .tablewrap tr{display:block;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:6px 10px;background:#fff}
+  .tablewrap td{display:block;border:0;padding:4px 0 4px 104px;position:relative;min-height:24px}
+  .tablewrap td::before{content:attr(data-label);position:absolute;left:0;top:5px;width:96px;font-size:12px;font-weight:700;color:var(--muted)}
+  .tablewrap td[data-label=""]{padding-left:0}
+  .tablewrap td[data-label=""]::before{display:none}
+  .tablewrap td:empty{display:none}
+  .tablewrap td.note{max-width:none}
+  .tablewrap td .small.muted{display:block}
+  tr.click:hover td{background:transparent}
+}
+/* ---------- phone header: compact bar + menu ---------- */
+.menu-btn{display:none;background:rgba(255,255,255,.15);border:0;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer;white-space:nowrap}
+.logo .sub{font-weight:600;opacity:.85}
+@media(max-width:900px){
+  header{padding:10px 14px;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:40}
+  header{flex-wrap:wrap}
+  header .logo{flex:1 1 0;min-width:0;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .menu-btn{flex:0 0 auto}
+  header .logo .sub{display:none}
+  .menu-btn{display:inline-flex;align-items:center;gap:6px}
+  header nav,header .who{display:none}
+  header.open nav{display:flex;flex-direction:column;flex:1 1 100%;gap:2px;padding-top:6px;border-top:1px solid rgba(255,255,255,.2)}
+  header.open nav button{text-align:left;padding:12px 10px;font-size:15px}
+  header.open .who{display:flex;flex:1 1 100%;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 0 4px;border-top:1px solid rgba(255,255,255,.2)}
+  header.open .who #whoName{flex:1 1 100%}
+  header.open .who button{padding:9px 14px}
+}
 </style>
 </head>
 <body>
@@ -131,7 +161,8 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
 <!-- ============ APP ============ -->
 <div id="appView" class="hidden">
   <header>
-    <div class="logo">Crown Peak Games Zambia · Call Centre</div>
+    <div class="logo">Crown Peak Games Zambia<span class="sub"> · Call Centre</span></div>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu"><span id="menuLabel">Menu</span> ☰<span class="count hidden" id="cnt-menu"></span></button>
     <nav id="nav"></nav>
     <div class="who"><span id="whoName"></span><button id="myPwBtn" title="Change password">Password</button><button id="logoutBtn">Log out</button></div>
   </header>
@@ -500,7 +531,18 @@ async function enterApp(){
   openTab(S.user.role === 'agent' ? 'call' : 'esc');
   refreshCounts(); clearInterval(S.countInt); S.countInt = setInterval(refreshCounts, 60000);
 }
+$('menuBtn').onclick = e => { e.stopPropagation(); document.querySelector('header').classList.toggle('open'); };
+document.addEventListener('click', e => { const h = document.querySelector('header'); if (h && h.classList.contains('open') && !h.contains(e.target)) h.classList.remove('open'); });
+function labelTables(root){
+  root.querySelectorAll('.tablewrap table').forEach(t => {
+    const heads = [...t.querySelectorAll('thead th')].map(th => th.textContent.trim());
+    t.querySelectorAll('tbody tr').forEach(tr => [...tr.children].forEach((td, i) => { if (!td.hasAttribute('data-label')) td.setAttribute('data-label', heads[i] || ''); }));
+  });
+}
+new MutationObserver(() => labelTables(document.body)).observe(document.body, { childList: true, subtree: true });
 function openTab(id){
+  document.querySelector('header').classList.remove('open');
+  const t = TABS.find(x => x.id === id); if (t) $('menuLabel').textContent = t.label;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('hidden', t.id !== 'tab-' + id));
   $('nav').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === id));
   ({ call: () => {}, mycalls: loadMyCalls, followups: loadFollowups, esc: loadEsc, dash: loadDash, log: loadLog, users: loadUsers, setup: loadSetup })[id]();
@@ -512,7 +554,7 @@ async function refreshCounts(){
     const mine = fu.filter(c => c.agent === S.user.name && new Date(c.followup_due) <= new Date(Date.now() + 36e5)).length;
     const escN = S.user.role === 'agent' ? 0 : es.filter(e => e.status === 'OPEN' || e.overdue).length;
     const set = (id, n) => { const el = $(id); if (!el) return; el.textContent = n; el.classList.toggle('hidden', !n); };
-    set('cnt-fu', mine); set('cnt-esc', escN);
+    set('cnt-fu', mine); set('cnt-esc', escN); set('cnt-menu', mine + escN);
   } catch(e){}
 }
 function fillStatic(){
@@ -655,7 +697,7 @@ $('saveCallBtn').onclick = async () => {
    ===================================================================== */
 function callsTable(list, opts2 = {}){
   if (!list.length) return '<div class="muted">No calls.</div>';
-  return `<div class="tablewrap"><table><thead><tr><th>Time</th>${opts2.agent?'<th>Agent</th>':''}<th></th><th>Phone</th><th>Product / station</th><th>Reason</th><th>Result</th><th>Notes</th><th>Dur.</th></tr></thead><tbody>` +
+  return `<div class="tablewrap"><table><thead><tr><th>Time</th>${opts2.agent?'<th>Agent</th>':''}<th></th><th>Phone</th><th>Product</th><th>Reason</th><th>Result</th><th>Notes</th><th>Dur.</th></tr></thead><tbody>` +
     list.map(c => `<tr ${c.escalation_id?`class="click" data-esc="${c.escalation_id}"`:''}><td class="nowrap">${fmtDT(c.created_at)}</td>${opts2.agent?`<td>${esc(c.agent)}</td>`:''}
       <td>${c.direction==='IN'?'⬇':'⬆'}</td><td class="nowrap">${esc(localPhone(c.phone))}<div class="small muted">${esc(c.operator)}</div></td>
       <td>${esc(c.product||'')}<div class="small muted">${esc(c.station||'')}</div></td><td>${esc(c.category||'—')}${c.source==='IMPORT'?`<div><span class="badge blue">Google Forms</span></div>${c.legacy_reason?`<div class="small muted">Form: ${esc(c.legacy_reason)}</div>`:''}`:''}</td>
