@@ -207,7 +207,7 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
             <div class="field"><label id="lblIssue">What did the caller ask or report? <span class="req">*</span></label>
               <textarea id="fIssue" placeholder="Be specific: e.g. 'Won K500 on Roots FM draw on 18 Sep, says money not received on Airtel'"></textarea>
               <div class="hint"><span id="issueHelp"></span><span id="issueCount"></span></div></div>
-            <div class="field"><label id="lblAction">What did you tell them / do? <span class="req">*</span></label>
+            <div class="field"><label id="lblAction">What did you tell them / do? <span class="muted small">(optional)</span></label>
               <textarea id="fAction" placeholder="e.g. 'Checked history, no payout visible. Escalated to Finance, told customer to expect a call within 24 hrs'"></textarea>
               <div class="hint"><span id="actionHelp"></span><span id="actionCount"></span></div></div>
             </div>
@@ -580,7 +580,7 @@ function setDir(){
   $('lblType').textContent = inb ? 'Who is calling' : 'Who are you calling';
   $('lblReason').textContent = inb ? 'Reason for call' : 'Purpose of call';
   $('lblIssue').innerHTML = (inb ? 'What did the caller ask or report?' : 'Why you called & what the customer said') + ' <span class="req">*</span>';
-  $('lblAction').innerHTML = (inb ? 'What did you tell them / do?' : 'What you told them / agreed next step') + ' <span class="req">*</span>';
+  $('lblAction').innerHTML = (inb ? 'What did you tell them / do?' : 'What you told them / agreed next step') + ' <span class="muted small">(optional)</span>';
   S.outcome = null;
   const list = inb ? S.ref.outcomes_in : S.ref.outcomes_out;
   $('outcomePills').innerHTML = list.map(o => `<button class="pill ${FAILED.includes(o)||o==='PRANK'?'fail':''} ${o==='ESCALATED'?'esc':''} ${o==='FOLLOW_UP'?'fu':''}" data-o="${o}">${esc(OUT_LABEL[o]||o)}</button>`).join('');
